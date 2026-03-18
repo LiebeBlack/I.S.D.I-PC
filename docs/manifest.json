@@ -1,0 +1,17 @@
+{
+    "name": "I.S.D.I — Isla Digital (Core UI)",
+    "short_name": "isdi_core",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#02080a",
+    "theme_color": "#00ffca",
+    "description": "Plataforma educativa de ciberseguridad para las nuevas generaciones.",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "favicon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ]
+}
