@@ -1,11 +1,10 @@
-# 🏝️ I.S.D.I — Instituto de Seguridad Digital e Interactividad
+# 🏝️ I.S.D.I — ISla DIgital
 
 [![Platform: Windows | Mobile](https://img.shields.io/badge/Platform-Windows%20%7C%20Mobile-00C853?style=flat-square)](#)
 [![Flet Version](https://img.shields.io/badge/Flet-0.27.3-00B0FF?style=flat-square)](https://flet.dev)
 
 **Isla Digital** no es solo una aplicación; es un ecosistema pedagógico diseñado para transformar la educación en ciberseguridad. Basado en el modelo **CPA (Concreto-Pictórico-Abstracto)** y los principios de gamificación interactiva, el sistema traduce conceptos tecnológicos de alta complejidad en metáforas visuales que niños y adolescentes de 3 a 16 años pueden navegar intuitivamente.
 
----
 
 ## 🏗️ Arquitectura del Sistema
 
@@ -55,10 +54,3 @@ python src/main.py
 ## 📜 Licencia
 
 Este proyecto está bajo la Licencia Apache 2.0. Ver el archivo [LICENSE](LICENSE) para más detalles.
-
----
-
-## 👨‍💻 Desarrollador
-
-Desarrollado con ❤️ para la nueva generación de ciudadanos digitales.
-**I.S.D.I Project — 2026**
