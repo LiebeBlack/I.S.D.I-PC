@@ -201,15 +201,26 @@
         security: 'Configura tu privacidad. Tu información es un tesoro valioso.',
         fact: 'Lo que publicas hoy puede ser visto por alguien en el futuro distante.'
       },
-      omega: {
-        title: 'Algoritmos, Sesgo y Sociedad Tecnológica',
-        intro: 'La tecnología no es neutral; refleja los valores de quienes la crean.',
-        architecture: 'Burbujas de Filtro: sistemas que solo muestran lo que queremos ver.',
-        security: 'Transparencia en la IA: explicar por qué un algoritmo toma decisiones.',
-        fact: 'El sesgo de confirmación nos hace creer lo que ya encaja con nuestras ideas.'
-      }
+    omega: {
+      title: 'Algoritmos, Sesgo y Sociedad Tecnológica',
+      intro: 'La tecnología no es neutral; refleja los valores de quienes la crean.',
+      architecture: 'Burbujas de Filtro: sistemas que solo muestran lo que queremos ver.',
+      security: 'Transparencia en la IA: explicar por qué un algoritmo toma decisiones.',
+      fact: 'El sesgo de confirmación nos hace creer lo que ya encaja con nuestras ideas.'
     }
-  };
+  }
+};
+
+const MODULE_DISPLAY_NAMES = {
+  hardware: 'Hardware',
+  logic: 'Lógica',
+  network: 'Redes',
+  cybersecurity: 'Ciberseguridad',
+  os: 'Sistemas',
+  ai: 'IA',
+  programming: 'Código',
+  ethics: 'Ética'
+};
 
   /**
    * DOM Utilities
@@ -277,12 +288,15 @@
    * Background Particles Engine
    */
   function initParticles() {
+    const isMobile = window.innerWidth < 768;
     const canvas = $('#particles-canvas');
     if (!canvas) return;
     
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true }); // Performance hint
     let particles = [];
     let animationId;
+    
+    const countModifier = isMobile ? 0.4 : 1;
 
     const resize = () => {
       canvas.width = window.innerWidth;
@@ -300,7 +314,8 @@
     });
 
     const initParticleArray = () => {
-      const count = Math.min(CONFIG.particleCount, Math.floor(canvas.width * canvas.height / 15000));
+      const baseCount = Math.min(CONFIG.particleCount, Math.floor(canvas.width * canvas.height / 15000));
+      const count = Math.floor(baseCount * countModifier);
       particles = Array.from({ length: count }, createParticle);
     };
 
@@ -354,9 +369,23 @@
    * Educational Content Area
    */
   function initModuleTabs() {
-    const tabs = $$('.module-tab');
+    const tabContainer = $('#moduleTabs');
     const contentArea = $('#moduleContent');
-    if (!tabs.length || !contentArea) return;
+    if (!tabContainer || !contentArea) return;
+
+    // Render Tabs dynamically
+    tabContainer.innerHTML = Object.keys(MODULES_DATA).map((key, index) => {
+      const activeClass = index === 0 ? 'active' : '';
+      const selected = index === 0 ? 'true' : 'false';
+      return `<button class="module-tab ${activeClass}" 
+                      data-module="${key}" 
+                      role="tab" 
+                      aria-selected="${selected}" 
+                      aria-controls="moduleContent">${MODULE_DISPLAY_NAMES[key] || key}</button>`;
+    }).join('');
+
+    const tabs = $$('.module-tab');
+    if (!tabs.length) return;
 
     const renderModule = (moduleKey) => {
       const data = MODULES_DATA[moduleKey];
@@ -610,7 +639,9 @@
       });
     }, { threshold: 0.2, rootMargin: '-80px 0px -50% 0px' });
 
-    $$('section[id]').forEach(s => observer.observe(s));
+    $$('section[id]').forEach(s => {
+      if (s) observer.observe(s);
+    });
   }
 
   /**
