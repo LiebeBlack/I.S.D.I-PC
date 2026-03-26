@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="I.S.D.I — Repositorio: Visualizador en tiempo real del repositorio GitHub usando la API REST." />
+  <meta name="author" content="LiebeBlack" />
+  <title>I.S.D.I — Repositorio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+</head>
+<body>
+  <div class="loader" id="loader"><div class="loader__spinner"></div><span class="loader__text">CONECTANDO CON GITHUB...</span></div>
+  <div class="page-transition" id="page-transition"></div>
+  <div class="cursor-follower" id="cursor-follower"></div>
+  <canvas id="particle-canvas"></canvas>
+  <div class="static-bg"></div>
+  <div class="grid-overlay"></div>
+  <div class="mobile-overlay" id="mobile-overlay"></div>
+
+  <nav class="nav" id="main-nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo"><div class="nav__logo-icon">ID</div><span>I.S.D.I</span></a>
+      <div class="nav__links" id="nav-links">
+        <a href="index.html" class="nav__link">Home</a>
+        <a href="architecture.html" class="nav__link">Arquitectura</a>
+        <a href="curriculum.html" class="nav__link">Currículum</a>
+        <a href="repository.html" class="nav__link active">Repositorio</a>
+        <a href="https://github.com/LiebeBlack/I.S.D.I-PC" target="_blank" rel="noopener" class="nav__link">GitHub</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+      </div>
+      <button class="nav__hamburger" id="nav-hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="breadcrumbs">
+        <a href="index.html">Home</a><span class="breadcrumbs__sep">/</span>
+        <span class="breadcrumbs__current">Repositorio</span>
+      </div>
+    </div>
+
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-header" style="text-align:left;margin-left:0">
+          <span class="section-header__label reveal">En Tiempo Real</span>
+          <h1 class="section-header__title reveal delay-1" style="max-width:none">
+            Visualizador de <span class="gradient-text">Repositorio</span>
+          </h1>
+          <p class="section-header__description reveal delay-2" style="margin-left:0;max-width:55ch">
+            Podés navegar los archivos del repo directo acá. Se conecta a la API de GitHub y trae todo en vivo — estructura de carpetas, código fuente, lo que sea.
+          </p>
+        </div>
+
+        <!-- Repository Banner -->
+        <div class="repo-banner reveal" id="repo-banner">
+          <div class="repo-banner__info">
+            <div>
+              <div class="repo-banner__name">LiebeBlack/I.S.D.I-PC</div>
+              <div class="repo-banner__desc">Cargando información del repositorio...</div>
+            </div>
+          </div>
+          <div class="repo-banner__stats">
+            <div class="repo-stat"><span>Cargando...</span></div>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="reveal delay-1" style="display:flex;gap:var(--space-sm);margin-bottom:var(--space-lg);flex-wrap:wrap">
+          <a href="https://github.com/LiebeBlack/I.S.D.I-PC" target="_blank" rel="noopener" class="btn btn--primary btn--sm">Ver en GitHub</a>
+          <a href="https://github.com/LiebeBlack/I.S.D.I-PC/archive/refs/heads/main.zip" class="btn btn--secondary btn--sm">Descargar ZIP</a>
+          <a href="https://github.com/LiebeBlack/I.S.D.I-PC/issues" target="_blank" rel="noopener" class="btn btn--ghost btn--sm">Issues</a>
+        </div>
+
+        <!-- File Viewer -->
+        <div class="repo-viewer reveal delay-2" id="repo-viewer">
+          <div class="file-tree">
+            <div class="file-tree__header">
+              <span style="font-family:var(--font-mono)">›</span>
+              <span>Archivos del Proyecto</span>
+            </div>
+            <div id="file-tree-content">
+              <div class="skeleton" style="height:24px;margin-bottom:6px"></div>
+              <div class="skeleton" style="height:24px;margin-bottom:6px"></div>
+              <div class="skeleton" style="height:24px;margin-bottom:6px"></div>
+              <div class="skeleton" style="height:24px;margin-bottom:6px"></div>
+              <div class="skeleton" style="height:24px"></div>
+            </div>
+          </div>
+
+          <div class="file-preview" id="file-preview">
+            <div class="file-preview__header">
+              <span class="file-preview__path" id="file-preview-path">Selecciona un archivo</span>
+              <span style="font-family:var(--font-mono);font-size:var(--text-xs);color:var(--text-muted)">Live Preview</span>
+            </div>
+            <div class="file-preview__content" id="file-preview-content">
+              <div class="file-preview__placeholder">
+                <span style="font-size:2rem;opacity:0.2;font-family:var(--font-mono)">{ }</span>
+                <span>Selecciona un archivo del árbol para ver su contenido</span>
+                <span style="font-size:var(--text-xs);color:var(--text-muted)">Los archivos se cargan en tiempo real desde la API de GitHub</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Commits -->
+    <section class="section" style="background:var(--bg-secondary)">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-header__label reveal">Actividad</span>
+          <h2 class="section-header__title reveal delay-1">Commits <span class="gradient-text">Recientes</span></h2>
+          <p class="section-header__description reveal delay-2">Los últimos cambios que se hicieron en el repo, directo desde GitHub.</p>
+        </div>
+
+        <div class="reveal delay-3" style="background:var(--bg-elevated);border:1px solid var(--border-primary);border-radius:var(--radius-xl);overflow:hidden;max-width:700px;margin:0 auto">
+          <div style="padding:var(--space-sm) var(--space-md);border-bottom:1px solid var(--border-primary);background:var(--bg-tertiary);display:flex;align-items:center;gap:var(--space-xs)">
+            <span style="font-family:var(--font-mono);font-size:var(--text-sm);font-weight:600">Historial de Commits</span>
+          </div>
+          <div id="commits-list">
+            <div style="padding:var(--space-md)">
+              <div class="skeleton" style="height:50px;margin-bottom:8px"></div>
+              <div class="skeleton" style="height:50px;margin-bottom:8px"></div>
+              <div class="skeleton" style="height:50px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Developer CTA -->
+    <section class="section">
+      <div class="container container--narrow" style="text-align:center">
+        <h2 class="section-header__title reveal">Contribuir al <span class="gradient-text">Proyecto</span></h2>
+        <p style="color:var(--text-secondary);margin:var(--space-sm) auto var(--space-lg);max-width:40ch" class="reveal delay-1">
+          I.S.D.I está publicado en GitHub. Si querés aportar algo, reportar un bug o simplemente curiosear, acá tenés los links.
+        </p>
+        <div class="reveal delay-2" style="display:flex;justify-content:center;gap:var(--space-sm);flex-wrap:wrap">
+          <a href="https://github.com/LiebeBlack/I.S.D.I-PC/fork" target="_blank" rel="noopener" class="btn btn--primary">Fork del Proyecto</a>
+          <a href="https://github.com/LiebeBlack/I.S.D.I-PC/issues/new" target="_blank" rel="noopener" class="btn btn--secondary">Reportar Issue</a>
+          <a href="https://github.com/LiebeBlack" target="_blank" rel="noopener" class="btn btn--ghost">Desarrollador</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand"><div class="footer__brand-name">I.S.D.I — Isla Digital</div><p class="footer__brand-desc">Plataforma educativa de ciberseguridad, hardware y desarrollo de software.</p></div>
+        <div><h4 class="footer__col-title">Páginas</h4><div class="footer__col-links"><a href="index.html">Home</a><a href="architecture.html">Arquitectura</a><a href="curriculum.html">Currículum</a><a href="repository.html">Repositorio</a></div></div>
+        <div><h4 class="footer__col-title">Proyecto</h4><div class="footer__col-links"><a href="https://github.com/LiebeBlack/I.S.D.I-PC" target="_blank">Repositorio</a><a href="https://github.com/LiebeBlack" target="_blank">Desarrollador</a></div></div>
+      </div>
+      <div class="footer__bottom">
+        <span class="footer__copy">© 2026 I.S.D.I — Isla Digital. Desarrollado por <a href="https://github.com/LiebeBlack" target="_blank">LiebeBlack</a>.</span>
+      </div>
+    </div>
+  </footer>
+
+  <div class="perf-pill"><span class="perf-pill__dot"></span><span class="perf-pill__label">Detectando GPU...</span></div>
+  <script src="js/particles.js" defer></script>
+  <script src="js/github-api.js" defer></script>
+  <script src="js/core.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof GitHubViewer !== 'undefined') {
+        GitHubViewer.init();
+        GitHubViewer.loadCommits();
+      }
+    });
+  </script>
+</body>
+</html>

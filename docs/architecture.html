@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="I.S.D.I — Arquitectura de software: Clean Architecture con Flet, Python y SQLite." />
+  <meta name="author" content="LiebeBlack" />
+  <title>I.S.D.I — Arquitectura</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+</head>
+<body>
+  <div class="loader" id="loader"><div class="loader__spinner"></div><span class="loader__text">CARGANDO ARQUITECTURA...</span></div>
+  <div class="page-transition" id="page-transition"></div>
+  <div class="cursor-follower" id="cursor-follower"></div>
+  <canvas id="particle-canvas"></canvas>
+  <div class="static-bg"></div>
+  <div class="grid-overlay"></div>
+  <div class="mobile-overlay" id="mobile-overlay"></div>
+
+  <nav class="nav" id="main-nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo"><div class="nav__logo-icon">ID</div><span>I.S.D.I</span></a>
+      <div class="nav__links" id="nav-links">
+        <a href="index.html" class="nav__link">Home</a>
+        <a href="architecture.html" class="nav__link active">Arquitectura</a>
+        <a href="curriculum.html" class="nav__link">Currículum</a>
+        <a href="repository.html" class="nav__link">Repositorio</a>
+        <a href="https://github.com/LiebeBlack/I.S.D.I-PC" target="_blank" rel="noopener" class="nav__link">GitHub</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+      </div>
+      <button class="nav__hamburger" id="nav-hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="breadcrumbs">
+        <a href="index.html">Home</a><span class="breadcrumbs__sep">/</span>
+        <span class="breadcrumbs__current">Arquitectura</span>
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-header" style="text-align:left;margin-left:0">
+          <span class="section-header__label reveal">Detalle Técnico</span>
+          <h1 class="section-header__title reveal delay-1" style="max-width:none">
+            <span class="gradient-text">Clean Architecture</span>
+          </h1>
+          <p class="section-header__description reveal delay-2" style="margin-left:0;max-width:50ch">
+            Así es como se organiza el código dentro de I.S.D.I: cuatro capas bien separadas
+            para que cambiar la base de datos no rompa la interfaz, y vice versa.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture Overview Diagram -->
+    <section class="section" style="padding-top:0;background:var(--bg-secondary)">
+      <div class="container">
+        <h2 class="section-header__title reveal" style="text-align:center;margin-bottom:var(--space-xl)">
+          Diagrama de <span class="gradient-text">Capas</span>
+        </h2>
+
+        <div class="reveal delay-1" style="max-width:700px;margin:0 auto">
+          <!-- Layer 4: Presentation -->
+          <div style="background:linear-gradient(135deg,rgba(0,106,255,0.08),rgba(123,47,255,0.08));border:2px solid var(--border-accent);border-radius:var(--radius-xl);padding:var(--space-lg);text-align:center;margin-bottom:var(--space-sm);position:relative">
+            <div style="position:absolute;top:-12px;left:var(--space-md);background:var(--bg-secondary);padding:0 var(--space-xs);font-family:var(--font-mono);font-size:var(--text-xs);color:var(--accent-primary)">CAPA 4 — EXTERIOR</div>
+            <h3 style="font-size:var(--text-xl);margin-bottom:var(--space-xs)">Presentation Layer</h3>
+            <p style="color:var(--text-secondary);font-size:var(--text-sm)">Flet UI Components · Páginas · Widgets · Navegación</p>
+            <div style="display:flex;gap:var(--space-xs);justify-content:center;margin-top:var(--space-sm);flex-wrap:wrap">
+              <span class="arch-layer__tech">Flet</span>
+              <span class="arch-layer__tech">Flutter Engine</span>
+            </div>
+          </div>
+          <div style="text-align:center;color:var(--text-muted);font-size:var(--text-2xl);line-height:1">↕</div>
+
+          <!-- Layer 3: Application -->
+          <div style="background:linear-gradient(135deg,rgba(0,194,168,0.08),rgba(0,106,255,0.08));border:2px solid var(--border-primary);border-radius:var(--radius-xl);padding:var(--space-lg);text-align:center;margin-bottom:var(--space-sm);position:relative">
+            <div style="position:absolute;top:-12px;left:var(--space-md);background:var(--bg-secondary);padding:0 var(--space-xs);font-family:var(--font-mono);font-size:var(--text-xs);color:var(--accent-tertiary)">CAPA 3</div>
+            <h3 style="font-size:var(--text-xl);margin-bottom:var(--space-xs)">Application Layer</h3>
+            <p style="color:var(--text-secondary);font-size:var(--text-sm)">Use Cases · Controllers · ViewModels · DTOs</p>
+            <div style="display:flex;gap:var(--space-xs);justify-content:center;margin-top:var(--space-sm);flex-wrap:wrap">
+              <span class="arch-layer__tech">Python</span>
+              <span class="arch-layer__tech">Use Cases</span>
+            </div>
+          </div>
+          <div style="text-align:center;color:var(--text-muted);font-size:var(--text-2xl);line-height:1">↕</div>
+
+          <!-- Layer 2: Domain -->
+          <div style="background:linear-gradient(135deg,rgba(155,95,255,0.08),rgba(0,240,255,0.08));border:2px solid var(--accent-secondary);border-radius:var(--radius-xl);padding:var(--space-lg);text-align:center;margin-bottom:var(--space-sm);position:relative">
+            <div style="position:absolute;top:-12px;left:var(--space-md);background:var(--bg-secondary);padding:0 var(--space-xs);font-family:var(--font-mono);font-size:var(--text-xs);color:var(--accent-secondary)">CAPA 2 — NÚCLEO</div>
+            <h3 style="font-size:var(--text-xl);margin-bottom:var(--space-xs)">Domain Layer</h3>
+            <p style="color:var(--text-secondary);font-size:var(--text-sm)">Entities · Value Objects · Interfaces (Ports) · Business Rules</p>
+            <div style="display:flex;gap:var(--space-xs);justify-content:center;margin-top:var(--space-sm);flex-wrap:wrap">
+              <span class="arch-layer__tech">SOLID</span>
+              <span class="arch-layer__tech">Interfaces</span>
+            </div>
+          </div>
+          <div style="text-align:center;color:var(--text-muted);font-size:var(--text-2xl);line-height:1">↕</div>
+
+          <!-- Layer 1: Infrastructure -->
+          <div style="background:linear-gradient(135deg,rgba(255,0,110,0.04),rgba(255,189,46,0.04));border:2px solid var(--border-primary);border-radius:var(--radius-xl);padding:var(--space-lg);text-align:center;position:relative">
+            <div style="position:absolute;top:-12px;left:var(--space-md);background:var(--bg-secondary);padding:0 var(--space-xs);font-family:var(--font-mono);font-size:var(--text-xs);color:var(--text-tertiary)">CAPA 1 — INFRAESTRUCTURA</div>
+            <h3 style="font-size:var(--text-xl);margin-bottom:var(--space-xs)">Infrastructure Layer</h3>
+            <p style="color:var(--text-secondary);font-size:var(--text-sm)">Repositories (SQLite) · External APIs · File System · Adapters</p>
+            <div style="display:flex;gap:var(--space-xs);justify-content:center;margin-top:var(--space-sm);flex-wrap:wrap">
+              <span class="arch-layer__tech">SQLite</span>
+              <span class="arch-layer__tech">File I/O</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Detailed Layers -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-header__label reveal">Detalle</span>
+          <h2 class="section-header__title reveal delay-1">Cada <span class="gradient-text">Capa</span> en Profundidad</h2>
+        </div>
+
+        <div class="arch-layer reveal delay-1">
+          <span class="arch-layer__number">1</span>
+          <h3 class="arch-layer__title">Infrastructure Layer</h3>
+          <span class="arch-layer__tech">SQLite · File System · APIs Externas</span>
+          <p class="arch-layer__description">
+            Lo que toca el disco duro. Acá vive la conexión real con SQLite, la lectura de archivos del sistema y cualquier API externa. Si mañana cambiás SQLite por PostgreSQL, solo tocás esta capa.
+          </p>
+          <div class="code-block" style="margin-top:var(--space-md)">
+            <div class="code-block__header"><span class="code-block__lang">Python</span><div class="code-block__dots"><span class="code-block__dot code-block__dot--red"></span><span class="code-block__dot code-block__dot--yellow"></span><span class="code-block__dot code-block__dot--green"></span></div></div>
+<pre><span class="token-keyword">import</span> sqlite3
+<span class="token-keyword">from</span> domain.ports <span class="token-keyword">import</span> <span class="token-class">UserRepository</span>
+
+<span class="token-keyword">class</span> <span class="token-class">SQLiteUserRepository</span>(<span class="token-class">UserRepository</span>):
+    <span class="token-keyword">def</span> <span class="token-function">__init__</span>(self, db_path: <span class="token-class">str</span>):
+        self.conn = sqlite3.<span class="token-function">connect</span>(db_path)
+
+    <span class="token-keyword">def</span> <span class="token-function">find_by_id</span>(self, user_id: <span class="token-class">int</span>):
+        cursor = self.conn.<span class="token-function">execute</span>(
+            <span class="token-string">"SELECT * FROM users WHERE id = ?"</span>,
+            (user_id,)
+        )
+        <span class="token-keyword">return</span> cursor.<span class="token-function">fetchone</span>()</pre>
+          </div>
+        </div>
+
+        <div class="arch-layer reveal delay-2">
+          <span class="arch-layer__number">2</span>
+          <h3 class="arch-layer__title">Domain Layer</h3>
+          <span class="arch-layer__tech">Entities · Value Objects · Interfaces</span>
+          <p class="arch-layer__description">
+            La parte más importante y la que menos cambia. Acá están las entidades (User, Course, etc.), las reglas de negocio y las interfaces que las capas de afuera tienen que respetar. Cero dependencias externas.
+          </p>
+          <div class="code-block" style="margin-top:var(--space-md)">
+            <div class="code-block__header"><span class="code-block__lang">Python</span><div class="code-block__dots"><span class="code-block__dot code-block__dot--red"></span><span class="code-block__dot code-block__dot--yellow"></span><span class="code-block__dot code-block__dot--green"></span></div></div>
+<pre><span class="token-keyword">from</span> abc <span class="token-keyword">import</span> <span class="token-class">ABC</span>, abstractmethod
+<span class="token-keyword">from</span> dataclasses <span class="token-keyword">import</span> dataclass
+
+<span class="token-keyword">@dataclass</span>
+<span class="token-keyword">class</span> <span class="token-class">User</span>:
+    id: <span class="token-class">int</span>
+    name: <span class="token-class">str</span>
+    email: <span class="token-class">str</span>
+    role: <span class="token-class">str</span> = <span class="token-string">"student"</span>
+
+<span class="token-keyword">class</span> <span class="token-class">UserRepository</span>(<span class="token-class">ABC</span>):
+    <span class="token-keyword">@abstractmethod</span>
+    <span class="token-keyword">def</span> <span class="token-function">find_by_id</span>(self, user_id: <span class="token-class">int</span>) -> <span class="token-class">User</span>: ...</pre>
+          </div>
+        </div>
+
+        <div class="arch-layer reveal delay-3">
+          <span class="arch-layer__number">3</span>
+          <h3 class="arch-layer__title">Application Layer</h3>
+          <span class="arch-layer__tech">Use Cases · Controllers · DTOs</span>
+          <p class="arch-layer__description">
+            Los casos de uso. Cada acción que el usuario puede hacer ("ver mi perfil", "crear tarea") es una clase acá. Coordina entre el dominio y la infraestructura, pero no sabe qué base de datos estás usando.
+          </p>
+          <div class="code-block" style="margin-top:var(--space-md)">
+            <div class="code-block__header"><span class="code-block__lang">Python</span><div class="code-block__dots"><span class="code-block__dot code-block__dot--red"></span><span class="code-block__dot code-block__dot--yellow"></span><span class="code-block__dot code-block__dot--green"></span></div></div>
+<pre><span class="token-keyword">class</span> <span class="token-class">GetUserUseCase</span>:
+    <span class="token-keyword">def</span> <span class="token-function">__init__</span>(self, repo: <span class="token-class">UserRepository</span>):
+        self.repo = repo
+
+    <span class="token-keyword">def</span> <span class="token-function">execute</span>(self, user_id: <span class="token-class">int</span>) -> <span class="token-class">User</span>:
+        user = self.repo.<span class="token-function">find_by_id</span>(user_id)
+        <span class="token-keyword">if not</span> user:
+            <span class="token-keyword">raise</span> <span class="token-class">ValueError</span>(<span class="token-string">"Usuario no encontrado"</span>)
+        <span class="token-keyword">return</span> user</pre>
+          </div>
+        </div>
+
+        <div class="arch-layer reveal delay-4">
+          <span class="arch-layer__number">4</span>
+          <h3 class="arch-layer__title">Presentation Layer</h3>
+          <span class="arch-layer__tech">Flet · Flutter Engine · UI Components</span>
+          <p class="arch-layer__description">
+            Lo que ve el usuario. Pantallas hechas con Flet que llaman a los use cases de la capa de arriba y muestran los datos. Botones, formularios, listas, navegación — todo acá.
+          </p>
+          <div class="code-block" style="margin-top:var(--space-md)">
+            <div class="code-block__header"><span class="code-block__lang">Python</span><div class="code-block__dots"><span class="code-block__dot code-block__dot--red"></span><span class="code-block__dot code-block__dot--yellow"></span><span class="code-block__dot code-block__dot--green"></span></div></div>
+<pre><span class="token-keyword">import</span> flet <span class="token-keyword">as</span> ft
+
+<span class="token-keyword">class</span> <span class="token-class">UserPage</span>(ft.<span class="token-class">UserControl</span>):
+    <span class="token-keyword">def</span> <span class="token-function">__init__</span>(self, use_case: <span class="token-class">GetUserUseCase</span>):
+        <span class="token-keyword">super</span>().<span class="token-function">__init__</span>()
+        self.use_case = use_case
+
+    <span class="token-keyword">def</span> <span class="token-function">build</span>(self):
+        user = self.use_case.<span class="token-function">execute</span>(<span class="token-class">1</span>)
+        <span class="token-keyword">return</span> ft.<span class="token-function">Column</span>([
+            ft.<span class="token-function">Text</span>(user.name, size=<span class="token-class">24</span>),
+            ft.<span class="token-function">Text</span>(user.email, color=<span class="token-string">"grey"</span>),
+        ])</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOLID Principles -->
+    <section class="section" style="background:var(--bg-secondary)">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-header__label reveal">Principios</span>
+          <h2 class="section-header__title reveal delay-1">Principios <span class="gradient-text">SOLID</span></h2>
+        </div>
+        <div class="card-grid">
+          <div class="card reveal delay-1"><div class="card__icon" style="font-size:var(--text-3xl);background:none;border:none;font-family:var(--font-mono);font-weight:900;color:var(--accent-primary)">S</div><h3 class="card__title">Single Responsibility</h3><p class="card__description">Una clase, una responsabilidad. El repositorio guarda datos y punto. El use case orquesta lógica y punto.</p></div>
+          <div class="card reveal delay-2"><div class="card__icon" style="font-size:var(--text-3xl);background:none;border:none;font-family:var(--font-mono);font-weight:900;color:var(--accent-primary)">O</div><h3 class="card__title">Open/Closed</h3><p class="card__description">Querés agregar un nuevo tipo de reporte? Lo extendés, no modificás lo que ya funciona.</p></div>
+          <div class="card reveal delay-3"><div class="card__icon" style="font-size:var(--text-3xl);background:none;border:none;font-family:var(--font-mono);font-weight:900;color:var(--accent-primary)">L</div><h3 class="card__title">Liskov Substitution</h3><p class="card__description">Si cambiás SQLiteUserRepository por MongoUserRepository y la app sigue funcionando, estás cumpliendo Liskov.</p></div>
+          <div class="card reveal delay-4"><div class="card__icon" style="font-size:var(--text-3xl);background:none;border:none;font-family:var(--font-mono);font-weight:900;color:var(--accent-primary)">I</div><h3 class="card__title">Interface Segregation</h3><p class="card__description">Interfaces chicas y específicas. Cada interfaz define solo lo que su consumidor necesita.</p></div>
+          <div class="card reveal delay-5"><div class="card__icon" style="font-size:var(--text-3xl);background:none;border:none;font-family:var(--font-mono);font-weight:900;color:var(--accent-primary)">D</div><h3 class="card__title">Dependency Inversion</h3><p class="card__description">El dominio define una interfaz y la infraestructura la implementa. Las dependencias siempre apuntan hacia adentro.</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand"><div class="footer__brand-name">I.S.D.I — Isla Digital</div><p class="footer__brand-desc">Plataforma educativa de ciberseguridad, hardware y desarrollo de software.</p></div>
+        <div><h4 class="footer__col-title">Páginas</h4><div class="footer__col-links"><a href="index.html">Home</a><a href="architecture.html">Arquitectura</a><a href="curriculum.html">Currículum</a><a href="repository.html">Repositorio</a></div></div>
+        <div><h4 class="footer__col-title">Proyecto</h4><div class="footer__col-links"><a href="https://github.com/LiebeBlack/I.S.D.I-PC" target="_blank">Repositorio</a><a href="https://github.com/LiebeBlack" target="_blank">Desarrollador</a></div></div>
+      </div>
+      <div class="footer__bottom">
+        <span class="footer__copy">© 2026 I.S.D.I — Isla Digital. Desarrollado por <a href="https://github.com/LiebeBlack" target="_blank">LiebeBlack</a>.</span>
+      </div>
+    </div>
+  </footer>
+
+  <div class="perf-pill"><span class="perf-pill__dot"></span><span class="perf-pill__label">Detectando GPU...</span></div>
+  <script src="js/particles.js" defer></script>
+  <script src="js/core.js" defer></script>
+</body>
+</html>
