@@ -187,8 +187,8 @@ const GitHubViewer = (() => {
         <div class="repo-banner__info">
           <img src="${repo.owner.avatar_url}" alt="${repo.owner.login}" class="repo-banner__avatar" loading="lazy" />
           <div>
-            <div class="repo-banner__name">${repo.full_name}</div>
-            <div class="repo-banner__desc">${repo.description || 'I.S.D.I — Isla Digital'}</div>
+            <div class="repo-banner__name">${SecurityManager.sanitize(repo.full_name)}</div>
+            <div class="repo-banner__desc">${SecurityManager.sanitize(repo.description) || 'I.S.D.I — Isla Digital'}</div>
           </div>
         </div>
         <div class="repo-banner__stats">
@@ -206,7 +206,7 @@ const GitHubViewer = (() => {
           </div>
           <div class="repo-stat">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-            <span>${repo.language || 'Python'}</span>
+            <span>${SecurityManager.sanitize(repo.language) || 'Python'}</span>
           </div>
         </div>
       `;
@@ -254,12 +254,21 @@ const GitHubViewer = (() => {
         el.dataset.path = item.path;
         el.dataset.type = item.type;
 
-        const icon = item.type === 'dir' ? 'DIR' : getFileIcon(item.name);
         const sizeLabel = item.size ? ` (${formatSize(item.size)})` : '';
+        let icon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>'; // Default file
+        if (item.type === 'dir') {
+          icon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
+        } else {
+          const ext = item.name.split('.').pop().toLowerCase();
+          if (ext === 'py') icon = '<span style="color: #3776AB">🐍</span>';
+          if (ext === 'js') icon = '<span style="color: #F7DF1E">JS</span>';
+          if (ext === 'md') icon = '<span style="color: #555">MD</span>';
+          if (ext === 'html') icon = '<span style="color: #E34F26"><></span>';
+        }
 
         el.innerHTML = `
           <span class="tree-item__icon">${icon}</span>
-          <span class="tree-item__name">${item.name}${sizeLabel}</span>
+          <span class="tree-item__name">${SecurityManager.sanitize(item.name)}${sizeLabel}</span>
         `;
 
         if (item.type === 'dir') {
@@ -525,10 +534,10 @@ const GitHubViewer = (() => {
                onerror="this.style.display='none'" />
           <div style="flex: 1; min-width: 0;">
             <div style="font-size: var(--text-sm); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-              ${commit.commit.message.split('\n')[0]}
+              ${SecurityManager.sanitize(commit.commit.message.split('\n')[0])}
             </div>
             <div style="font-size: var(--text-xs); color: var(--text-tertiary); font-family: var(--font-mono); margin-top: 2px;">
-              ${commit.commit.author.name} · ${formatDate(commit.commit.author.date)} · 
+              ${SecurityManager.sanitize(commit.commit.author.name)} · ${formatDate(commit.commit.author.date)} · 
               <span style="color: var(--accent-primary);">${commit.sha.substring(0, 7)}</span>
             </div>
           </div>

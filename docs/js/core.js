@@ -15,79 +15,112 @@
  * =========================================================================== */
 const HardwareDetector = (() => {
   /**
-   * Test GPU performance by rendering to a WebGL canvas.
-   * Returns 'high' or 'low' based on GPU tier.
+   * Advanced GPU and System detection.
+   * Returns tiered performance classification: 'ultra' | 'high' | 'med' | 'low'.
    */
-  function detectGPU() {
+  function analyzeSystem() {
     try {
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      
-      // Fallback a low solo si WebGL está completamente deshabilitado
+
       if (!gl) return 'low';
+
+      // Advanced GPU Info
+      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      let gpuName = '';
+      if (debugInfo) {
+        gpuName = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL).toLowerCase();
+      }
 
       const cores = navigator.hardwareConcurrency || 4;
       const memory = navigator.deviceMemory || 4;
       const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent);
+      const isApple = gpuName.includes('apple') || gpuName.includes('metal');
+      const isHighEndGPU = gpuName.includes('nvidia') || gpuName.includes('radeon') || gpuName.includes('geforce') || gpuName.includes('rtx');
+      const isUHD600 = gpuName.includes('uhd 600') || gpuName.includes('uhd 605'); // Specifically requested
+      const isIntegrated = (gpuName.includes('intel') || gpuName.includes('iris') || gpuName.includes('uhd') || gpuName.includes('graphics')) && !isUHD600;
 
-      // BAJADA DE LÍMITES CORTESÍA DEL MODO 2020:
-      // Si es PC de Escritorio/Laptop, permitimos siempre el renderizado pesado
-      if (!isMobile) return 'high';
+      // Accessibility Check
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) return 'med';
 
-      // En Móvil: Solo lo apagamos si tiene menos de 4 núcleos o < 4GB de RAM (Gama muy baja pre-2020)
-      if (isMobile && (cores >= 4 || memory >= 4)) return 'high';
+      // TIER: ULTRA (All Desktop/Laptop systems and High-end Dedicated GPUs)
+      if (!isMobile || isHighEndGPU) {
+        return 'ultra';
+      }
 
-      // Default para calculadoras muy antiguas:
+      // TIER: HIGH (Modern Apple Silicon Mobile or High-end Flagship Phones)
+      if (isApple || (isMobile && cores >= 8 && memory >= 6)) {
+        return 'high';
+      }
+
+      // TIER: MED (Modern Mid-range Phones)
+      if (isIntegrated || (isMobile && cores >= 4 && memory >= 4)) {
+        return 'med';
+      }
+
+      // TIER: LOW (Ancient hardware / Battery Saver)
       return 'low';
     } catch (e) {
-      console.warn('[HW Detect] GPU detection failed, defaulting to low:', e);
-      return 'low';
+      console.warn('[HW Detect] Advanced detection failed:', e);
+      return 'high';
     }
   }
 
   /**
-   * Apply the detected tier to the DOM.
+  /**
+  /**
+   * Applies the performance tier to the DOM and CSS.
+   * Can be forced with a direct tier string (e.g., 'ultra' for admin mode).
    */
-  function apply() {
-    const tier = detectGPU();
-    document.body.classList.add(tier === 'high' ? 'high-end' : 'low-end');
-    document.body.dataset.gpuTier = tier;
+  function apply(forcedTier = null) {
+    // Check local admin state from SecurityManager
+    const isLocalAdmin = (typeof SecurityManager !== 'undefined' && SecurityManager.isAdminMode());
+    const tier = forcedTier || (isLocalAdmin ? 'ultra' : analyzeSystem());
 
-    // Activate appropriate background
-    const staticBg = document.getElementById('static-bg');
+    const body = document.body;
+    const staticBg = document.querySelector('.static-bg');
     const particleCanvas = document.getElementById('particle-canvas');
 
-    if (tier === 'high') {
-      // Fallback Inteligente: Show Vivid Mesh while WebGL computes
-      if (staticBg) staticBg.classList.add('active');
-      if (particleCanvas) particleCanvas.classList.add('active');
+    // Clean up old classes
+    body.classList.remove('ultra-end', 'high-end', 'med-end', 'low-end');
 
-      // Initialize Three.js particles
-      if (typeof ParticleSystem !== 'undefined') {
-        ParticleSystem.init();
-        // Fade out static mesh fallback after 3D is fully rendering
-        setTimeout(() => {
-          if (staticBg) staticBg.classList.remove('active');
-        }, 1800);
-      }
-    } else {
-      // Low-end uses the Vivid Mesh Gradient permanently
-      if (staticBg) staticBg.classList.add('active');
-    }
+    // Apply new class
+    body.classList.add(`${tier}-end`);
+    body.dataset.gpuTier = tier;
+    console.log(`%c[HW Detect] Render Engine: ${tier.toUpperCase()}`, "background: #7B2FFF; color: #000; padding: 2px 8px; border-radius: 4px; font-weight: bold;");
 
-    // Update performance pill
+    // Update performance label
     const dot = document.querySelector('.perf-pill__dot');
     const label = document.querySelector('.perf-pill__label');
     if (dot && label) {
-      dot.classList.add(tier === 'high' ? 'perf-pill__dot--high' : 'perf-pill__dot--low');
-      label.textContent = tier === 'high' ? 'GPU: High-End' : 'GPU: Optimized';
+      const colors = { ultra: '#00F0FF', high: '#28CA41', med: '#FFBD2E', low: '#FF5F57' };
+      dot.style.backgroundColor = colors[tier];
+      label.textContent = `GPU: ${tier.toUpperCase()}`;
+
+      dot.className = 'perf-pill__dot';
+      dot.classList.add(`perf-pill__dot--${tier === 'ultra' || tier === 'high' ? 'high' : 'low'}`);
     }
 
-    console.log(`[HW Detect] GPU Tier: ${tier}`);
-    return tier;
+    // Effect management: Ultra/High use Particles, others use Static
+    if (tier === 'ultra' || tier === 'high') {
+      if (typeof ParticleSystem !== 'undefined') {
+        ParticleSystem.init(tier);
+        if (particleCanvas) particleCanvas.classList.add('active');
+        // Smooth transition: remove static bg after particles are ready
+        setTimeout(() => {
+          if (staticBg) staticBg.classList.remove('active');
+        }, 1500); 
+      }
+    } else {
+      // For low/med, keep static bg and stop particles
+      if (staticBg) staticBg.classList.add('active');
+      if (particleCanvas) particleCanvas.classList.remove('active');
+      if (typeof ParticleSystem !== 'undefined' && ParticleSystem.stop) ParticleSystem.stop();
+    }
   }
 
-  return { detect: detectGPU, apply };
+  return { apply };
 })();
 
 /* =============================================================================
@@ -300,8 +333,8 @@ const Navigation = (() => {
     document.querySelectorAll('.nav__link').forEach(link => {
       const href = link.getAttribute('href');
       if (href === filename ||
-          (filename === '' && href === 'index.html') ||
-          (filename === 'index.html' && href === 'index.html')) {
+        (filename === '' && href === 'index.html') ||
+        (filename === 'index.html' && href === 'index.html')) {
         link.classList.add('active');
       }
     });
@@ -422,25 +455,50 @@ const LazyLoader = (() => {
  * Handles the initial loading state transition.
  * =========================================================================== */
 const LoadingScreen = (() => {
+  const phrases = [
+    'Analizando arquitectura de hardware...',
+    'Sincronizando modelos de datos...',
+    'Estableciendo protocolos de seguridad...',
+    'Optimizando núcleo de renderizado...',
+    'Verificando integridad de archivos...',
+    'Cargando módulos de ciberseguridad...'
+  ];
+
   function init() {
     const loader = document.querySelector('.loader');
+    const loaderText = document.querySelector('.loader__text');
     if (!loader) return;
+
+    // Cycle messages
+    let i = 0;
+    const interval = setInterval(() => {
+      if (loaderText) {
+        loaderText.textContent = phrases[i % phrases.length];
+        i++;
+      }
+    }, 800);
 
     window.addEventListener('load', () => {
       setTimeout(() => {
-        loader.classList.add('hidden');
-        // Remove from DOM after transition
-        setTimeout(() => loader.remove(), 600);
-      }, 600);
+        clearInterval(interval);
+        if (loaderText) loaderText.textContent = 'Sistema Listo';
+
+        setTimeout(() => {
+          loader.classList.add('hidden');
+          // Remove from DOM after transition
+          setTimeout(() => loader.remove(), 600);
+        }, 300);
+      }, 1200);
     });
 
-    // Fallback: Hide loader after 4 seconds max
+    // Fallback
     setTimeout(() => {
+      clearInterval(interval);
       if (loader && !loader.classList.contains('hidden')) {
         loader.classList.add('hidden');
         setTimeout(() => loader.remove(), 600);
       }
-    }, 4000);
+    }, 6000);
   }
 
   return { init };
@@ -550,26 +608,227 @@ function createTypingEffect(element, texts, speed = 80, pause = 2000) {
  * Prevents content copying, context menu, and keyboard shortcuts.
  * =========================================================================== */
 const SecurityManager = (() => {
-  function init() {
-    // Disable Context Menu
-    document.addEventListener('contextmenu', e => e.preventDefault());
+  let _isLocalAdmin = false;
+  try {
+    _isLocalAdmin = sessionStorage.getItem('isdi_admin') === 'true';
+  } catch (e) { }
 
-    // Disable Image Dragging
-    document.addEventListener('dragstart', e => {
-      if (e.target.tagName === 'IMG') e.preventDefault();
+  // Public accessor for other modules to know if we are in admin mode
+  function isAdminMode() { return _isLocalAdmin; }
+
+  let trapInterval;
+  let scrubbingInterval;
+  let contentBackup = null;
+
+  function init() {
+    // 0. RESET SECURITY STATE (To ensure manual reload or new session clears old locks)
+    try { sessionStorage.removeItem('isdi_locking'); } catch (e) { }
+
+    let buffer = '';
+    document.addEventListener('keydown', e => {
+      buffer += e.key.toLowerCase();
+      if (buffer.endsWith('aidmin')) {
+        try { sessionStorage.setItem('isdi_admin', 'true'); } catch (e) { }
+        console.log("%c[I.S.D.I] ACCESO CONCEDIDO — REINICIANDO CON PERMISOS MAESTROS", "color: #00FF00; font-weight: bold; font-size: 16px;");
+        location.reload(); // Reload for perfect rendering
+      }
+      if (buffer.length > 10) buffer = buffer.substring(1);
     });
 
-    // Disable Shortcuts (Ctrl+C, Ctrl+X, Ctrl+U, Cmd+C, Cmd+X, Cmd+U)
+    if (_isLocalAdmin) {
+      console.log("%c[I.S.D.I] MODO ADMINISTRADOR ACTIVO — SEGURIDAD DESACTIVADA", "color: #00FF00; font-weight: bold;");
+      // PURGE SESSION: So that a manual reload (F5) locks the site again
+      try { sessionStorage.removeItem('isdi_admin'); } catch (e) { }
+
+      HardwareDetector.apply('ultra');
+      return;
+    }
+
+    // 2. High-Frequency DevTools Detection & Persistent Scrubbing
+    detectDevTools();
+    window.addEventListener('resize', detectDevTools);
+
+    scrubbingInterval = setInterval(() => {
+      if (!isAdmin) {
+        detectDevTools();
+      }
+    }, 100);
+
+    // 3. Disable Context Menu Silently
+    document.addEventListener('contextmenu', e => {
+      if (isAdmin) return;
+      e.preventDefault();
+      // No showWarning() here, just block it.
+    });
+
+    // 4. Disable Shortcuts
     document.addEventListener('keydown', e => {
-      if ((e.ctrlKey || e.metaKey)) {
-        const key = e.key.toLowerCase();
-        if (key === 'c' || key === 'x' || key === 'u') {
-          e.preventDefault();
-        }
+      if (isAdmin) return;
+      const key = e.key.toLowerCase();
+      if (
+        (e.ctrlKey && (key === 'c' || key === 'x' || key === 'u' || key === 's')) ||
+        (e.ctrlKey && e.shiftKey && (key === 'i' || key === 'j' || key === 'c')) ||
+        (key === 'f12')
+      ) {
+        e.preventDefault();
+        triggerLock(); // Trigger physical wipe and show warning
+        return false;
       }
     });
+
+    // 5. Advanced Anti-Source Debugger Trap (Freezes Sources tab)
+    trapInterval = setInterval(() => {
+      if (!isAdmin) {
+        (function () {
+          (function a() {
+            try {
+              (function b(i) {
+                if (("" + i / i).length !== 1 || i % 20 === 0) {
+                  (function () { }).constructor("debugger")();
+                } else {
+                  (function () { }).constructor("debugger")();
+                }
+                b(++i);
+              })(0);
+            } catch (e) { }
+          })();
+        })();
+
+        // Secondary aggressive trap
+        const t = function () {
+          const x = new Function("debugger");
+          x();
+        };
+        setTimeout(t, 20);
+      }
+    }, 100);
   }
 
+  function detectDevTools() {
+    if (_isLocalAdmin) return;
+    
+    // Total Sensitivity Threshold
+    const threshold = 100;
+    const isDetected = (window.outerWidth - window.innerWidth > threshold) || 
+                       (window.outerHeight - window.innerHeight > threshold);
+
+    if (isDetected) {
+      // NUCLEAR PURGE: Redirecting to a standalone file unloads original sources from the browser memory.
+      if (!sessionStorage.getItem('isdi_locking')) {
+        try { sessionStorage.setItem('isdi_locking', 'true'); } catch(e) {}
+        
+        // Kill execution
+        window.stop();
+        
+        // Clear DOM context first
+        document.documentElement.innerHTML = '';
+        
+        // Attempt forced redirection (most reliable for Sources purge)
+        try {
+            window.location.replace('security-lock.html');
+        } catch(e) {
+            // Fallback for browsers with strict file:/// origin policies
+            window.open('security-lock.html', '_self');
+        }
+
+        throw new Error("Security Protocol Active: Sources Purged.");
+      }
+    }
+  }
+
+  function triggerLock() {
+    if (_isLocalAdmin) return;
+    // ABSOLUTE WIPE: If any inspector-like dimension is detected, wipe the entire HTML
+    if (document.body && !contentBackup) {
+      contentBackup = Array.from(document.body.children);
+      // Wipe the entire document!
+      document.documentElement.innerHTML = `
+          <head>
+            <title>Acceso Restringido</title>
+            <style>
+              body { background: #000; margin:0; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: monospace; color: #ff0000; text-align: center; }
+              .overlay { border: 2px solid #7B2FFF; padding: 40px; border-radius: 20px; background: rgba(0,0,0,0.8); box-shadow: 0 0 100px rgba(123, 47, 255, 0.5); }
+              .btn { background: #7B2FFF; color: #000; border: none; padding: 14px 40px; border-radius: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; margin-top: 30px; }
+            </style>
+          </head>
+          <body>
+            <div class="overlay">
+              <h1 style="font-size: 3rem; margin-bottom: 20px;">!</h1>
+              <h2 style="font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px;">Acceso Restringido</h2>
+              <p style="color: #ccc; max-width: 500px; line-height: 1.6;">El sistema ha detectado un intento de interacción externa. Operación bloqueada por protocolos de seguridad.</p>
+              <button class="btn" onclick="location.reload()">Recargar Página</button>
+              <p style="font-size: 0.7rem; color: #7B2FFF; margin-top: 30px; opacity: 0.6;">ESTADO: BLOQUEO ABSOLUTO DE DOM</p>
+            </div>
+          </body>
+        `;
+      throw new Error("Security Protocol Active: Inspection Blocked.");
+    }
+  }
+
+  function showWarning() {
+    if (_isLocalAdmin) return;
+    let overlay = document.querySelector('.security-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.className = 'security-overlay';
+      overlay.innerHTML = `
+        <div class="security-overlay__icon">!</div>
+        <h2 class="security-overlay__title">Acceso Restringido: Acción No Autorizada</h2>
+        <p class="security-overlay__msg">
+          El sistema ha detectado un intento de interacción externa o guardado de código. 
+          Por políticas de seguridad y protección de arquitectura, estas funciones están deshabilitadas.
+        </p>
+        <button class="security-overlay__btn" onclick="location.reload()">Recargar Página</button>
+        <div class="security-overlay__footer">ESTADO: OPERACIÓN BLOQUEADA</div>
+      `;
+      document.body.appendChild(overlay);
+    }
+    overlay.classList.add('active');
+  }
+
+  function sanitize(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  return { init, isAdminMode, sanitize };
+})();
+
+/* =============================================================================
+ * Error Monitor
+ * Silent logging and recovery.
+ * =========================================================================== */
+const ErrorMonitor = (() => {
+  function init() {
+    window.onerror = (msg, url, lineNo, columnNo, error) => {
+      // Suppress Security-related "errors" or browser-origin noise
+      if (msg && (
+        msg.includes('Security Protocol') ||
+        msg.includes('Script error') ||
+        msg.includes('Unsafe attempt') ||
+        msg.includes('unique security origins')
+      )) {
+        return true;
+      }
+      console.error(`[ISDI Error] ${msg} at ${lineNo}:${columnNo}`);
+      return true; // Prevent the firing of the default event handler
+    };
+
+    window.onunhandledrejection = (event) => {
+      const reason = event.reason ? event.reason.toString() : '';
+      if (
+        reason.includes('Security Protocol') ||
+        reason.includes('Script error') ||
+        reason.includes('Unsafe attempt')
+      ) {
+        event.preventDefault();
+        return;
+      }
+      console.error(`[ISDI Async Error] ${reason}`);
+    };
+  }
   return { init };
 })();
 
@@ -577,48 +836,45 @@ const SecurityManager = (() => {
  * Initialize Everything on DOM Ready
  * =========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
+  // 0. Error Monitor
+  ErrorMonitor.init();
+
   // 1. Loading screen (do first)
   LoadingScreen.init();
 
-  // 2. Theme (must be early)
+  // 2. Security
+  SecurityManager.init();
+
+  // 3. Theme (must be early)
   ThemeManager.init();
 
-  // 3. Hardware detection
+  // 4. Hardware detection
   HardwareDetector.apply();
 
-  // 4. Cursor follower
-  CursorFollower.init();
-
-  // 5. Navigation
+  // 5. Cursor follower disabled for static perfection
+  // CursorFollower.init();
+ 
+  // 6. Navigation
   Navigation.init();
-
-  // 6. Scroll animations
-  ScrollAnimations.init();
-
+ 
+  // 6. Scroll animations disabled for static perfection
+  // ScrollAnimations.init();
+ 
   // 7. Lazy loading
   LazyLoader.init();
-
+ 
   // 8. Smooth scroll
   initSmoothScroll();
-
+ 
   // 9. Counters
   initCounters();
-
-  // 10. Typing effect (if hero typing element exists)
+ 
+  // 10. Typing effect disabled: using static keyword
   const typingEl = document.getElementById('hero-typing');
   if (typingEl) {
-    createTypingEffect(typingEl, [
-      'Ciberseguridad',
-      'Hardware Avanzado',
-      'Arquitectura Limpia',
-      'Python & Flet',
-      'Isla Digital'
-    ], 90, 2500);
+    typingEl.textContent = 'Ciberseguridad';
   }
 
   console.log('%c I.S.D.I — Isla Digital ', 'background: linear-gradient(135deg, #006AFF, #7B2FFF); color: #fff; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: bold;');
   console.log('%c Developed by LiebeBlack ', 'color: #00F0FF; font-family: monospace;');
-
-  // 11. Activate Security
-  SecurityManager.init();
 });

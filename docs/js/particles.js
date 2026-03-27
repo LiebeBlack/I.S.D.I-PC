@@ -52,12 +52,20 @@ const ParticleSystem = (() => {
     return texture;
   }
 
-  function init() {
+  function init(tier = 'high') {
     if (isInitialized) return;
     if (typeof THREE === 'undefined') return;
 
     const canvas = document.getElementById('particle-canvas');
     if (!canvas) return;
+
+    // Adjust CONFIG based on tier
+    if (tier === 'ultra') {
+      CONFIG.textCount = 40;
+    } else if (tier === 'med') {
+      CONFIG.textStrings = ['I.S.D.I', '{...}', '0xABC', 'await'];
+      CONFIG.textCount = 10;
+    }
 
     isInitialized = true;
     clock = new THREE.Clock();
@@ -77,23 +85,29 @@ const ParticleSystem = (() => {
     renderer = new THREE.WebGLRenderer({
       canvas,
       alpha: true,
-      antialias: true,
+      antialias: tier !== 'med',
       powerPreference: 'high-performance'
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    
+    // Pixel ratio management
+    const maxPR = tier === 'ultra' ? 2 : (tier === 'high' ? 1.8 : 1.2);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxPR));
 
     // Dramatic Lighting applied to 2D
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    const ambientLight = new THREE.AmbientLight(0xffffff, tier === 'ultra' ? 0.6 : 0.4);
     scene.add(ambientLight);
 
-    const pointLight1 = new THREE.PointLight(0xffffff, 2.5, 300);
+    const pointLight1 = new THREE.PointLight(0xffffff, tier === 'ultra' ? 4.0 : 2.5, 300);
     pointLight1.position.set(0, 50, 20);
     scene.add(pointLight1);
 
-    const pointLight2 = new THREE.PointLight(0xffffff, 2.5, 300);
-    pointLight2.position.set(0, -50, 20);
-    scene.add(pointLight2);
+    // Only one point light for med tier to save draws
+    if (tier !== 'med') {
+      const pointLight2 = new THREE.PointLight(0xffffff, tier === 'ultra' ? 4.0 : 2.5, 300);
+      pointLight2.position.set(0, -50, 20);
+      scene.add(pointLight2);
+    }
 
     textGroup = new THREE.Group();
     geoGroup = new THREE.Group();
@@ -118,7 +132,7 @@ const ParticleSystem = (() => {
     });
 
     animate();
-    console.log('[Particles] 2D Abstract Typographic Engine Initialized');
+    console.log(`[Particles] 2D Engine Initialized at ${tier.toUpperCase()} quality`);
   }
 
   function buildScene() {
