@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="I.S.D.I — Repositorio: Visualizador en tiempo real del repositorio GitHub usando la API REST." />
   <meta name="author" content="LiebeBlack" />
+  <meta property="og:title" content="I.S.D.I — Repositorio GitHub" />
+  <meta property="og:description" content="Explora el código fuente y el historial de cambios del proyecto ISDI en tiempo real." />
+  <meta property="og:type" content="website" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://avatars.githubusercontent.com https://raw.githubusercontent.com; connect-src 'self' https://api.github.com https://raw.githubusercontent.com; worker-src 'self' blob:; frame-src 'none'; object-src 'none';" />
+  <meta name="theme-color" content="#0052FF" />
   <title>I.S.D.I — Repositorio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,7 +17,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
 </head>
 <body>
-  <div class="loader" id="loader"><div class="loader__spinner"></div><span class="loader__text">CONECTANDO CON GITHUB...</span></div>
+  <div class="loader" id="loader"><div class="loader__spinner"></div><span class="loader__text">INICIALIZANDO PROTOCOLO: GITHUB_API...</span></div>
   <div class="page-transition" id="page-transition"></div>
   <div class="cursor-follower" id="cursor-follower"></div>
   <canvas id="particle-canvas"></canvas>
@@ -27,6 +32,7 @@
         <a href="index.html" class="nav__link">Home</a>
         <a href="architecture.html" class="nav__link">Arquitectura</a>
         <a href="curriculum.html" class="nav__link">Currículum</a>
+        <a href="bitacora.html" class="nav__link">Bitácora</a>
         <a href="repository.html" class="nav__link active">Repositorio</a>
         <a href="https://github.com/LiebeBlack/I.S.D.I-PC" target="_blank" rel="noopener" class="nav__link">GitHub</a>
         <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
@@ -152,11 +158,16 @@
     <div class="container">
       <div class="footer__inner">
         <div class="footer__brand"><div class="footer__brand-name">I.S.D.I — Isla Digital</div><p class="footer__brand-desc">Plataforma educativa de ciberseguridad, hardware y desarrollo de software.</p></div>
-        <div><h4 class="footer__col-title">Páginas</h4><div class="footer__col-links"><a href="index.html">Home</a><a href="architecture.html">Arquitectura</a><a href="curriculum.html">Currículum</a><a href="repository.html">Repositorio</a></div></div>
+        <div><h4 class="footer__col-title">Páginas</h4><div class="footer__col-links"><a href="index.html">Home</a><a href="architecture.html">Arquitectura</a><a href="curriculum.html">Currículum</a><a href="bitacora.html">Bitácora</a><a href="repository.html">Repositorio</a></div></div>
         <div><h4 class="footer__col-title">Proyecto</h4><div class="footer__col-links"><a href="https://github.com/LiebeBlack/I.S.D.I-PC" target="_blank">Repositorio</a><a href="https://github.com/LiebeBlack" target="_blank">Desarrollador</a></div></div>
       </div>
       <div class="footer__bottom">
         <span class="footer__copy">© 2026 I.S.D.I — Isla Digital. Desarrollado por <a href="https://github.com/LiebeBlack" target="_blank">LiebeBlack</a>.</span>
+        <div class="footer__socials">
+          <a href="https://github.com/LiebeBlack" target="_blank" rel="noopener" class="footer__social-link" aria-label="GitHub">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+          </a>
+        </div>
       </div>
     </div>
   </footer>
