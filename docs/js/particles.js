@@ -15,7 +15,7 @@ const ParticleSystem = (() => {
   let targetX = 0, targetY = 0;
   let animFrame = null;
   let isInitialized = false;
-  let clock;
+  let clock, handleVisibilityChange;
 
   let elements = [];
 
@@ -52,19 +52,24 @@ const ParticleSystem = (() => {
     return texture;
   }
 
-  function init(tier = 'high') {
+  function init(tier = 'high', config = null) {
     if (isInitialized) return;
     if (typeof THREE === 'undefined') return;
 
     const canvas = document.getElementById('particle-canvas');
     if (!canvas) return;
 
-    // Adjust CONFIG based on tier
-    if (tier === 'ultra') {
-      CONFIG.textCount = 40;
-    } else if (tier === 'med') {
-      CONFIG.textStrings = ['I.S.D.I', '{...}', '0xABC', 'await'];
-      CONFIG.textCount = 10;
+    // Use flexible config from HardwareDetector if provided
+    if (config) {
+      CONFIG.textCount = config.particles;
+      CONFIG.interactionScale = config.interaction;
+    } else {
+      // Fallback adjustments based on tier
+      if (tier === 'ultra') CONFIG.textCount = 60;
+      else if (tier === 'high') CONFIG.textCount = 30;
+      else if (tier === 'med') CONFIG.textCount = 15;
+      else CONFIG.textCount = 5;
+      CONFIG.interactionScale = 1.0;
     }
 
     isInitialized = true;
@@ -85,28 +90,37 @@ const ParticleSystem = (() => {
     renderer = new THREE.WebGLRenderer({
       canvas,
       alpha: true,
-      antialias: tier !== 'med',
+      antialias: config ? config.antialias : (tier !== 'med'),
       powerPreference: 'high-performance'
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
     
     // Pixel ratio management
-    const maxPR = tier === 'ultra' ? 2 : (tier === 'high' ? 1.8 : 1.2);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxPR));
+    const pr = config ? config.pixelRatio : (tier === 'ultra' ? 2 : 1);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, pr));
 
-    // Dramatic Lighting applied to 2D
-    const ambientLight = new THREE.AmbientLight(0xffffff, tier === 'ultra' ? 0.6 : 0.4);
+    // Dynamic Lighting (Adaptive Balance for Visibility)
+    const lightConfig = config ? config.lights : (tier === 'ultra' ? 3 : (tier === 'low' ? 0 : 1));
+    const ambientIntensity = tier === 'ultra' ? 0.6 : (tier === 'low' ? 1.2 : (tier === 'med' ? 1.0 : 0.8));
+    const ambientLight = new THREE.AmbientLight(0xffffff, ambientIntensity);
     scene.add(ambientLight);
 
-    const pointLight1 = new THREE.PointLight(0xffffff, tier === 'ultra' ? 4.0 : 2.5, 300);
-    pointLight1.position.set(0, 50, 20);
-    scene.add(pointLight1);
+    if (lightConfig >= 1) {
+      const pointLight1 = new THREE.PointLight(0xffffff, tier === 'ultra' ? 4.0 : 2.5, 300);
+      pointLight1.position.set(0, 50, 20);
+      scene.add(pointLight1);
+    }
 
-    // Only one point light for med tier to save draws
-    if (tier !== 'med') {
+    if (lightConfig >= 2) {
       const pointLight2 = new THREE.PointLight(0xffffff, tier === 'ultra' ? 4.0 : 2.5, 300);
       pointLight2.position.set(0, -50, 20);
       scene.add(pointLight2);
+    }
+
+    if (lightConfig >= 3) {
+      const pointLight3 = new THREE.PointLight(0x7B2FFF, tier === 'ultra' ? 8.0 : 4.0, 400); // Purple glow
+      pointLight3.position.set(50, 0, 30);
+      scene.add(pointLight3);
     }
 
     textGroup = new THREE.Group();
@@ -118,18 +132,17 @@ const ParticleSystem = (() => {
 
     window.addEventListener('resize', onResize, { passive: true });
     document.addEventListener('mousemove', onMouseMove, { passive: true });
-
-    // Scroll interaction
     document.addEventListener('scroll', onScroll, { passive: true });
 
-    // Web Performance: Pause when tab is invisible
-    document.addEventListener('visibilitychange', () => {
+    // Named handler for visibility to allow proper cleanup
+    handleVisibilityChange = () => {
       if (document.hidden) {
         if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
       } else {
         if (!animFrame && isInitialized) animate();
       }
-    });
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     animate();
     console.log(`[Particles] 2D Engine Initialized at ${tier.toUpperCase()} quality`);
@@ -236,8 +249,12 @@ const ParticleSystem = (() => {
   }
 
   function animate() {
+    if (!isInitialized || !renderer || !scene || !camera) {
+      if (animFrame) cancelAnimationFrame(animFrame);
+      return;
+    }
     animFrame = requestAnimationFrame(animate);
-    const time = clock.getElapsedTime();
+    const time = clock ? clock.getElapsedTime() : performance.now() * 0.001;
 
     // Mouse magnetic interpolation (Fluid Micro-interactions)
     targetX += (mouseX * 0.05 - targetX) * 0.05;
@@ -262,16 +279,16 @@ const ParticleSystem = (() => {
       const floatY = Math.cos(time + data.floatOffset) * 2;
 
       // 3. Mouse repulsion/attraction (Magnetic Fluidity)
-      // targetX and targetY come from mouse
-      const dx = data.ogX - targetX * data.w * 0.04;
-      const dy = data.ogY + targetY * data.h * 0.04;
+      const inter = CONFIG.interactionScale || 1.0;
+      const dx = data.ogX - targetX * data.w * 0.04 * inter;
+      const dy = data.ogY + targetY * data.h * 0.04 * inter;
 
       // 4. Scroll reaction (parallax scatter)
       const scrollOffset = scrollY * data.scatterFactor;
 
       // Apply
-      el.position.x = data.ogX + floatX + (dx * 0.02 * data.scatterFactor);
-      el.position.y = data.ogY + floatY + (dy * 0.02 * data.scatterFactor) + scrollOffset;
+      el.position.x = data.ogX + floatX + (dx * 0.02 * data.scatterFactor * inter);
+      el.position.y = data.ogY + floatY + (dy * 0.02 * data.scatterFactor * inter) + scrollOffset;
 
       el.rotation.z += data.rotSpeedZ;
 
@@ -285,7 +302,10 @@ const ParticleSystem = (() => {
 
   function onResize() {
     if (!camera || !renderer) return;
-    const aspect = window.innerWidth / window.innerHeight;
+    if (!renderer || !camera) return;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const aspect = width / height;
     const frustumSize = 100;
 
     // Update Orthographic boundaries
@@ -295,11 +315,15 @@ const ParticleSystem = (() => {
     camera.bottom = -frustumSize / 2;
     camera.updateProjectionMatrix();
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(width, height);
 
-    // Update width/height bounds in metadata
-    const w = (window.innerWidth / window.innerHeight) * 100;
-    elements.forEach(el => { el.userData.w = w; });
+    // Dynamic Boundary Recalculation
+    const newW = aspect * 100;
+    const newH = 100;
+    elements.forEach(el => {
+      el.userData.w = newW;
+      el.userData.h = newH;
+    });
   }
 
   function onMouseMove(e) {
@@ -330,19 +354,63 @@ const ParticleSystem = (() => {
   }
 
   function destroy() {
-    if (animFrame) cancelAnimationFrame(animFrame);
-    if (renderer) renderer.dispose();
-    elements.forEach(b => {
-      b.geometry.dispose();
-      if (b.material.map) b.material.map.dispose();
-      b.material.dispose();
+    if (!isInitialized && !renderer) return;
+    
+    // Stop the loop immediately
+    isInitialized = false;
+    if (animFrame) {
+      cancelAnimationFrame(animFrame);
+      animFrame = null;
+    }
+
+    if (!renderer) return;
+
+    // GPU Memory Cleanup: Dispose all Three.js assets to prevent leaks
+    scene.traverse(node => {
+        if (node.isLight) {
+          // Point and Ambient lights don't require disposal but good to remove
+          if (scene) scene.remove(node);
+        }
+        if (node.isMesh) {
+            if (node.geometry) node.geometry.dispose();
+            if (node.material) {
+                if (Array.isArray(node.material)) {
+                    node.material.forEach(m => {
+                      if (m.map) m.map.dispose();
+                      m.dispose();
+                    });
+                } else {
+                    if (node.material.map) node.material.map.dispose();
+                    node.material.dispose();
+                }
+            }
+        }
     });
+
+    if (renderer) {
+        renderer.dispose();
+    }
+    
+    // Release references
+    scene = null;
+    camera = null;
+    renderer = null;
     elements = [];
+
+    // Cleanup Event Listeners
     window.removeEventListener('resize', onResize);
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('scroll', onScroll);
-    isInitialized = false;
+    if (handleVisibilityChange) {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }
+    
+    console.log('%c[ParticleSystem] Render State Cleaned.', 'color: #7B2FFF; font-size: 10px;');
   }
 
-  return { init, destroy, updateColors };
+  function stop() {
+    destroy();
+  }
+
+  return { init, stop, destroy, updateColors };
 })();

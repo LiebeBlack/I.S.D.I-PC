@@ -14,12 +14,64 @@
  * Detects GPU capability to toggle high-end vs low-end rendering modes.
  * =========================================================================== */
 const HardwareDetector = (() => {
+  let currentTier = 'med';
+
+  // Configuración de renderizado premium y flexible (Diferenciación Extrema)
+  const RenderingConfig = {
+    ultra: {
+      label: 'ULTRA (MÁXIMO)',
+      particles: 80,
+      geoCount: 50,
+      antialias: true,
+      pixelRatio: 2.0,
+      bloom: true,
+      lights: 3,
+      interaction: 5.0
+    },
+    high: {
+      label: 'ALTO (ESTÁNDAR)',
+      particles: 40,
+      geoCount: 10,
+      antialias: true,
+      pixelRatio: 1.0,
+      bloom: false,
+      lights: 1,
+      interaction: 2.5
+    },
+    med: {
+      label: 'MEDIO (AHORRO)',
+      particles: 15,
+      geoCount: 0,
+      antialias: false,
+      pixelRatio: 1.0,
+      bloom: false,
+      lights: 1,
+      interaction: 1.5
+    },
+    low: {
+      label: 'BAJO (ESTÁTICO)',
+      particles: 0,
+      geoCount: 0,
+      antialias: false,
+      pixelRatio: 1.0,
+      bloom: false,
+      lights: 0,
+      interaction: 0.0
+    }
+  };
+
   /**
    * Advanced GPU and System detection.
    * Returns tiered performance classification: 'ultra' | 'high' | 'med' | 'low'.
    */
-  function analyzeSystem() {
+  async function analyzeSystem() {
     try {
+      // 0. Manual Override for Admin/Testing
+      const storedOverride = localStorage.getItem('isdi_gpu_tier');
+      if (storedOverride && ['ultra', 'high', 'med', 'low'].includes(storedOverride)) {
+        return storedOverride;
+      }
+
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
@@ -35,92 +87,177 @@ const HardwareDetector = (() => {
       const cores = navigator.hardwareConcurrency || 4;
       const memory = navigator.deviceMemory || 4;
       const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent);
-      const isApple = gpuName.includes('apple') || gpuName.includes('metal');
-      const isHighEndGPU = gpuName.includes('nvidia') || gpuName.includes('radeon') || gpuName.includes('geforce') || gpuName.includes('rtx');
-      const isUHD600 = gpuName.includes('uhd 600') || gpuName.includes('uhd 605'); // Specifically requested
-      const isIntegrated = (gpuName.includes('intel') || gpuName.includes('iris') || gpuName.includes('uhd') || gpuName.includes('graphics')) && !isUHD600;
 
-      // Accessibility Check
+      // Detection for 2026+ standards
+      const isApple = gpuName.includes('apple') || gpuName.includes('metal') || (isMobile && navigator.vendor && navigator.vendor.includes('Apple'));
+      const isUltraGPU = gpuName.includes('rtx 50') || gpuName.includes('rtx 40') || gpuName.includes('radeon 8') || gpuName.includes('adreno 8') || gpuName.includes('m4') || gpuName.includes('m5');
+      const isHighEndGPU = gpuName.includes('nvidia') || gpuName.includes('radeon') || gpuName.includes('geforce') || gpuName.includes('rtx') || gpuName.includes('quadro') || gpuName.includes('adreno 7');
+      const isLowEnd = gpuName.includes('uhd 600') || gpuName.includes('uhd 605') || gpuName.includes('uhd 610') || gpuName.includes('n4000') || gpuName.includes('j4105') || gpuName.includes('n100');
+
+      // Accessibility & Power Check
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReducedMotion) return 'med';
+      if (prefersReducedMotion) return 'low';
 
-      // TIER: ULTRA (All Desktop/Laptop systems and High-end Dedicated GPUs)
-      if (!isMobile || isHighEndGPU) {
+      // Advanced: Battery / Power Save
+      if (navigator.getBattery) {
+        const battery = await navigator.getBattery();
+        if (battery.charging === false && battery.level < 0.15) return 'low';
+      }
+
+      // TIER: ULTRA (Flagship 2026 Desktop/Laptops or Next-Gen Mobile)
+      // Requirements reduced by half: 6 cores / 8GB RAM
+      if (!isMobile && (isUltraGPU || (cores >= 6 && memory >= 8))) {
         return 'ultra';
       }
 
-      // TIER: HIGH (Modern Apple Silicon Mobile or High-end Flagship Phones)
-      if (isApple || (isMobile && cores >= 8 && memory >= 6)) {
+      if (isUltraGPU || (isMobile && cores >= 4 && memory >= 6)) {
+        return 'ultra';
+      }
+
+      // TIER: HIGH (Modern budget PC / Phone standard)
+      // Requirements reduced by half: 2 cores / 4GB RAM
+      if (isApple || isHighEndGPU || (isMobile && cores >= 2 && memory >= 4)) {
         return 'high';
       }
 
-      // TIER: MED (Modern Mid-range Phones)
-      if (isIntegrated || (isMobile && cores >= 4 && memory >= 4)) {
+      if (!isMobile && cores >= 4 && memory >= 4) {
+        return 'high';
+      }
+
+      // TIER: MED (Standard older phone)
+      if (!isLowEnd || (isMobile && cores >= 2 && memory >= 2)) {
         return 'med';
       }
 
-      // TIER: LOW (Ancient hardware / Battery Saver)
+      // TIER: LOW (Ancient hardware, extreme power save)
       return 'low';
     } catch (e) {
       console.warn('[HW Detect] Advanced detection failed:', e);
-      return 'high';
+      return 'med';
     }
   }
 
-  /**
-  /**
-  /**
-   * Applies the performance tier to the DOM and CSS.
-   * Can be forced with a direct tier string (e.g., 'ultra' for admin mode).
-   */
-  function apply(forcedTier = null) {
-    // Check local admin state from SecurityManager
-    const isLocalAdmin = (typeof SecurityManager !== 'undefined' && SecurityManager.isAdminMode());
-    const tier = forcedTier || (isLocalAdmin ? 'ultra' : analyzeSystem());
+  let _isApplying = false;
+  async function apply(forcedTier = null) {
+    if (_isApplying) return;
+    _isApplying = true;
 
-    const body = document.body;
-    const staticBg = document.querySelector('.static-bg');
-    const particleCanvas = document.getElementById('particle-canvas');
+    try {
+      // Check local admin state from SecurityManager
+      const isLocalAdmin = (typeof SecurityManager !== 'undefined' && SecurityManager.isAdminMode());
+      const tier = forcedTier || await analyzeSystem();
+      currentTier = tier;
 
-    // Clean up old classes
-    body.classList.remove('ultra-end', 'high-end', 'med-end', 'low-end');
+      const body = document.body;
+      const staticBg = document.querySelector('.static-bg');
+      const particleCanvas = document.getElementById('particle-canvas');
 
-    // Apply new class
-    body.classList.add(`${tier}-end`);
-    body.dataset.gpuTier = tier;
-    console.log(`%c[HW Detect] Render Engine: ${tier.toUpperCase()}`, "background: #7B2FFF; color: #000; padding: 2px 8px; border-radius: 4px; font-weight: bold;");
+      // Clean up old classes
+      body.classList.remove('ultra-end', 'high-end', 'med-end', 'low-end');
 
-    // Update performance label
-    const dot = document.querySelector('.perf-pill__dot');
-    const label = document.querySelector('.perf-pill__label');
-    if (dot && label) {
-      const colors = { ultra: '#00F0FF', high: '#28CA41', med: '#FFBD2E', low: '#FF5F57' };
-      dot.style.backgroundColor = colors[tier];
-      label.textContent = `GPU: ${tier.toUpperCase()}`;
+      // Apply new class
+      body.classList.add(`${tier}-end`);
+      body.dataset.gpuTier = tier;
+      console.log(`%c[HW Detect] Render Engine: ${tier.toUpperCase()}`, "background: #7B2FFF; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: bold;");
 
-      dot.className = 'perf-pill__dot';
-      dot.classList.add(`perf-pill__dot--${tier === 'ultra' || tier === 'high' ? 'high' : 'low'}`);
-    }
+      // Update performance label
+      const pill = document.querySelector('.perf-pill');
+      const dot = document.querySelector('.perf-pill__dot');
+      const label = document.querySelector('.perf-pill__label');
 
-    // Effect management: Ultra/High use Particles, others use Static
-    if (tier === 'ultra' || tier === 'high') {
-      if (typeof ParticleSystem !== 'undefined') {
-        ParticleSystem.init(tier);
-        if (particleCanvas) particleCanvas.classList.add('active');
-        // Smooth transition: remove static bg after particles are ready
-        setTimeout(() => {
-          if (staticBg) staticBg.classList.remove('active');
-        }, 1500); 
+      if (dot && label) {
+        const colors = { ultra: '#00F0FF', high: '#28CA41', med: '#FFBD2E', low: '#FF5F57' };
+        const config = RenderingConfig[tier];
+        dot.style.backgroundColor = colors[tier];
+        label.textContent = `MODO: ${config.label}`;
+
+        dot.className = 'perf-pill__dot';
+        dot.classList.add(`perf-pill__dot--${tier === 'ultra' || tier === 'high' ? 'high' : 'low'}`);
+
+        if (isLocalAdmin) {
+          label.textContent = `RENDERIZADO: ${config.label}`;
+          if (pill) {
+            pill.classList.add('perf-pill--interactive');
+            pill.title = 'Selector de Calidad: Clic para alternar';
+            if (!pill.onclick) {
+              pill.onclick = (e) => {
+                e.stopPropagation();
+                cycleTier();
+              };
+            }
+          }
+        }
       }
-    } else {
-      // For low/med, keep static bg and stop particles
-      if (staticBg) staticBg.classList.add('active');
-      if (particleCanvas) particleCanvas.classList.remove('active');
-      if (typeof ParticleSystem !== 'undefined' && ParticleSystem.stop) ParticleSystem.stop();
+
+      // 10. Effect management: Ultra/High use Particles, others use Static
+      if (tier === 'ultra' || tier === 'high' || (tier === 'med' && RenderingConfig.med.particles > 0)) {
+        if (typeof ParticleSystem !== 'undefined') {
+          const config = RenderingConfig[tier];
+          
+          // CRITICAL: Stop and clean OLD render before starting NEW one
+          ParticleSystem.stop();
+          
+          // Re-reveal canvas
+          if (particleCanvas) particleCanvas.classList.add('active');
+          if (staticBg) staticBg.classList.remove('active');
+          
+          // Initialize new tier
+          ParticleSystem.init(tier, config);
+        }
+      } else {
+        if (staticBg) staticBg.classList.add('active');
+        if (particleCanvas) particleCanvas.classList.remove('active');
+        if (typeof ParticleSystem !== 'undefined') ParticleSystem.stop();
+      }
+    } finally {
+      _isApplying = false;
     }
   }
 
-  return { apply };
+  function getTierConfig() {
+    return RenderingConfig[currentTier];
+  }
+
+  function cycleTier() {
+    const tiers = ['ultra', 'high', 'med', 'low'];
+    const currentIndex = tiers.indexOf(currentTier);
+    const nextIndex = (currentIndex + 1) % tiers.length;
+    const nextTier = tiers[nextIndex];
+
+    localStorage.setItem('isdi_gpu_tier', nextTier);
+    console.log(`%c[Admin] Live Switching to ${nextTier.toUpperCase()}`, "color: #7B2FFF; font-weight: bold;");
+
+    // Enable admin data attributes for CSS control
+    const isLocalAdmin = (typeof SecurityManager !== 'undefined' && SecurityManager.isAdminMode());
+    document.documentElement.setAttribute('data-admin', isLocalAdmin ? 'true' : 'false');
+
+    apply(nextTier);
+  }
+
+  let _cachedGPU = null;
+  /**
+   * Returns a snapshot of detected hardware for debug purposes.
+   */
+  function getSystemInfo() {
+    if (!_cachedGPU) {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl');
+      if (gl) {
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        _cachedGPU = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'Genérica';
+      } else {
+        _cachedGPU = 'No WebGL';
+      }
+    }
+    return {
+      gpu: _cachedGPU,
+      cores: navigator.hardwareConcurrency || 'N/A',
+      memory: navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'N/A',
+      tier: currentTier.toUpperCase()
+    };
+  }
+
+  return { apply, getSystemInfo };
 })();
 
 /* =============================================================================
@@ -609,11 +746,14 @@ function createTypingEffect(element, texts, speed = 80, pause = 2000) {
  * =========================================================================== */
 const SecurityManager = (() => {
   let _isLocalAdmin = false;
+  let _securityHits = 0;
+  
   try {
     _isLocalAdmin = sessionStorage.getItem('isdi_admin') === 'true';
   } catch (e) { }
 
-  // Public accessor for other modules to know if we are in admin mode
+  function logSecurityHit() { _securityHits++; }
+  function getSecurityHits() { return _securityHits; }
   function isAdminMode() { return _isLocalAdmin; }
 
   let trapInterval;
@@ -637,10 +777,16 @@ const SecurityManager = (() => {
 
     if (_isLocalAdmin) {
       console.log("%c[I.S.D.I] MODO ADMINISTRADOR ACTIVO — SEGURIDAD DESACTIVADA", "color: #00FF00; font-weight: bold;");
-      // PURGE SESSION: So that a manual reload (F5) locks the site again
-      try { sessionStorage.removeItem('isdi_admin'); } catch (e) { }
-
-      HardwareDetector.apply('ultra');
+      
+      // PERSISTENT ADMIN: We ONLY purge the session key if it's NOT a test session
+      // This ensures we stay in admin mode during testing reloads, but F5 usually exits.
+      // (Actually, sessionStorage survives F5, but purges on tab close).
+      // We will leave it for now to follow the "reload manual = exit" request.
+      
+      // If we are here, we are already admin. 
+      // Do nothing to purge until explicitly requested or if it's a fresh manual entrance.
+      
+      HardwareDetector.apply(); 
       return;
     }
 
@@ -670,7 +816,7 @@ const SecurityManager = (() => {
         (key === 'f12')
       ) {
         e.preventDefault();
-        triggerLock(); 
+        triggerLock();
         return false;
       }
     });
@@ -695,7 +841,7 @@ const SecurityManager = (() => {
             })();
           })();
         }
-        
+
         const t = function () {
           const x = new Function("debugger");
           x();
@@ -707,25 +853,26 @@ const SecurityManager = (() => {
 
   function detectDevTools() {
     if (_isLocalAdmin) return;
-    
+
     // Ignore dimension check on mobile to prevent blocking during resize/orientation change
     const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent);
     if (isMobile) return;
 
     // Total Sensitivity Threshold (Increased for modern high-res screens)
     const threshold = 160;
-    const isDetected = (window.outerWidth - window.innerWidth > threshold) || 
-                       (window.outerHeight - window.innerHeight > threshold);
+    const isDetected = (window.outerWidth - window.innerWidth > threshold) ||
+      (window.outerHeight - window.innerHeight > threshold);
 
     if (isDetected) {
+      logSecurityHit();
       if (!sessionStorage.getItem('isdi_locking')) {
-        try { sessionStorage.setItem('isdi_locking', 'true'); } catch(e) {}
+        try { sessionStorage.setItem('isdi_locking', 'true'); } catch (e) { }
         window.stop();
         document.documentElement.innerHTML = '';
         try {
-            window.location.replace('security-lock.html');
-        } catch(e) {
-            window.open('security-lock.html', '_self');
+          window.location.replace('security-lock.html');
+        } catch (e) {
+          window.open('security-lock.html', '_self');
         }
         throw new Error("Security Protocol Active: Sources Purged.");
       }
@@ -789,7 +936,173 @@ const SecurityManager = (() => {
     return div.innerHTML;
   }
 
-  return { init, isAdminMode, sanitize };
+  return { init, isAdminMode, sanitize, logSecurityHit, getSecurityHits };
+})();
+
+/* =============================================================================
+ * Admin Debug HUD (ISDI Command Center)
+ * =========================================================================== */
+const AdminPanel = (() => {
+  let panel = null;
+  let lastTime = performance.now();
+  let frames = 0;
+  let fps = 0;
+  let raf = null;
+
+  function init() {
+    if (typeof SecurityManager === 'undefined' || !SecurityManager.isAdminMode()) return;
+    if (panel) return;
+
+    panel = document.createElement('div');
+    panel.id = 'admin-hud';
+    panel.innerHTML = `
+      <div class="hud__header">
+        <div class="hud__logo">
+          <span class="hud__logo-i">I</span><span class="hud__logo-s">S</span>D<span class="hud__logo-i">I</span> <small>CMD_CTRL</small>
+        </div>
+        <div class="hud__status"><span></span>ADMIN_ACTIVE</div>
+      </div>
+
+      <div class="hud__grid">
+        <div class="hud__col">
+          <label><i class="hud-ico">⌬</i> TELEMETRÍA</label>
+          <div class="hud__val-group">
+            <span id="hud-fps">--</span> <small>FPS</small>
+            <div class="hud__graph"><div id="hud-fps-bar"></div></div>
+          </div>
+          <div class="hud__sub">TIER: <b id="hud-tier">--</b> | <span id="hud-particles">--</span> ITEMS</div>
+        </div>
+        
+        <div class="hud__col">
+          <label><i class="hud-ico">⚙</i> ARQUITECTURA</label>
+          <div class="hud__info" id="hud-gpu">Wait...</div>
+          <div class="hud__specs">
+             <span>CPU cores: <b id="hud-cores">--</b></span>
+             <span>HEAP_RAM: <b id="hud-ram">--</b></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hud__divider"></div>
+
+      <div class="hud__grid">
+        <div class="hud__col">
+          <label><i class="hud-ico">🌐</i> RED & ENTORNO</label>
+          <div class="hud__specs">
+            <span>PING: <b id="hud-net-lat">--</b> ms (<span id="hud-net-type">--</span>)</span>
+            <span>OS: <b id="hud-os">--</b></span>
+          </div>
+        </div>
+        <div class="hud__col">
+          <label><i class="hud-ico">🖥</i> PANTALLA</label>
+          <div class="hud__specs">
+            <span>RES: <b id="hud-res">--</b></span>
+            <span>UPTIME: <b id="hud-uptime">0s</b></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hud__divider"></div>
+
+      <div class="hud__footer">
+        <span class="hud__tag">SEC_TOKEN: OK</span>
+        <span class="hud__clock" id="hud-clock">00:00:00</span>
+      </div>
+    `;
+    document.body.appendChild(panel);
+    
+    // Setup static data Once
+    const info = HardwareDetector.getSystemInfo();
+    const gpuEl = document.getElementById('hud-gpu');
+    const coresEl = document.getElementById('hud-cores');
+    const osEl = document.getElementById('hud-os');
+    
+    if (gpuEl) gpuEl.textContent = info.gpu;
+    if (coresEl) coresEl.textContent = info.cores;
+    if (osEl) {
+        const platform = navigator.platform || 'Desconocido';
+        osEl.textContent = platform;
+    }
+
+    animate();
+  }
+
+  function animate() {
+    frames++;
+    const now = performance.now();
+    
+    // SMOOTH FEED: Graph and counter update at high frequency
+    if (now >= lastTime + 500) {
+      fps = Math.round((frames * 1000) / (now - lastTime));
+      updateTelemetry(fps, now);
+      frames = 0;
+      lastTime = now;
+    }
+    raf = requestAnimationFrame(animate);
+  }
+
+  function updateTelemetry(fpsVal, now) {
+    const fpsEl = document.getElementById('hud-fps');
+    const barEl = document.getElementById('hud-fps-bar');
+    const ramEl = document.getElementById('hud-ram');
+    const netTypeEl = document.getElementById('hud-net-type');
+    const netLatEl = document.getElementById('hud-net-lat');
+    const resEl = document.getElementById('hud-res');
+    const uptimeEl = document.getElementById('hud-uptime');
+    const clockEl = document.getElementById('hud-clock');
+    const partEl = document.getElementById('hud-particles');
+    const tierEl = document.getElementById('hud-tier');
+    const hitEl = document.getElementById('hud-security-hits');
+    
+    if (fpsEl) fpsEl.textContent = fpsVal;
+    if (barEl) {
+      const percentage = Math.min((fpsVal / 60) * 100, 100);
+      barEl.style.width = `${percentage}%`;
+      barEl.style.backgroundColor = fpsVal > 50 ? '#00F0FF' : (fpsVal > 30 ? '#FFBD2E' : '#FF5F57');
+    }
+
+    // High-frequency telemetry (Every ~500ms via animate check)
+    if (ramEl && window.performance && performance.memory) {
+       const mem = Math.round(performance.memory.usedJSHeapSize / 1048576);
+       ramEl.textContent = `${mem}MB`;
+    }
+
+    if (navigator.connection) {
+       if (netTypeEl) netTypeEl.textContent = (navigator.connection.effectiveType || 'N/A').toUpperCase();
+       if (netLatEl) netLatEl.textContent = navigator.connection.rtt || '0';
+    }
+
+    if (resEl) resEl.textContent = `${window.innerWidth}×${window.innerHeight}`;
+    if (uptimeEl) uptimeEl.textContent = `${Math.round(performance.now() / 1000)}s`;
+    
+    if (clockEl) {
+       const d = new Date();
+       clockEl.textContent = d.toTimeString().split(' ')[0];
+    }
+    
+    if (hitEl && typeof SecurityManager !== 'undefined') {
+       hitEl.textContent = SecurityManager.getSecurityHits ? SecurityManager.getSecurityHits() : '0';
+    }
+
+    if (tierEl && typeof HardwareDetector !== 'undefined') {
+       const info = HardwareDetector.getSystemInfo();
+       tierEl.textContent = info.tier;
+       if (partEl && typeof RenderingConfig !== 'undefined') {
+           // Direct mapping from the actual platform configuration
+           const label = info.tier.toLowerCase();
+           let tierKey = 'low';
+           if (label.includes('máximo')) tierKey = 'ultra';
+           else if (label.includes('estándar')) tierKey = 'high';
+           else if (label.includes('ahorro')) tierKey = 'med';
+           
+           if (RenderingConfig[tierKey]) {
+             partEl.textContent = RenderingConfig[tierKey].particles;
+           }
+       }
+    }
+  }
+
+  return { init };
 })();
 
 /* =============================================================================
@@ -831,46 +1144,38 @@ const ErrorMonitor = (() => {
 /* =============================================================================
  * Initialize Everything on DOM Ready
  * =========================================================================== */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // 0. Error Monitor
   ErrorMonitor.init();
 
   // 1. Loading screen (do first)
   LoadingScreen.init();
 
-  // 2. Security
+  // 2. Security (Initializes admin check)
   SecurityManager.init();
 
-  // 3. Theme (must be early)
+  // 3. Theme
   ThemeManager.init();
 
-  // 4. Hardware detection
-  HardwareDetector.apply();
+  // 4. Hardware detection & Visual initialization
+  // We await this to ensure the main UI is ready before we reveal the scene
+  await HardwareDetector.apply();
 
-  // 5. Cursor follower disabled for static perfection
-  // CursorFollower.init();
- 
-  // 6. Navigation
+  // 5. Shared Modules
   Navigation.init();
- 
-  // 6. Scroll animations disabled for static perfection
-  // ScrollAnimations.init();
- 
-  // 7. Lazy loading
   LazyLoader.init();
- 
-  // 8. Smooth scroll
   initSmoothScroll();
- 
   // 9. Counters
   initCounters();
- 
-  // 10. Typing effect disabled: using static keyword
+
+  // 10. Admin Debug HUD
+  AdminPanel.init();
+
   const typingEl = document.getElementById('hero-typing');
   if (typingEl) {
     typingEl.textContent = 'Ciberseguridad';
   }
 
   console.log('%c I.S.D.I — Isla Digital ', 'background: linear-gradient(135deg, #006AFF, #7B2FFF); color: #fff; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: bold;');
-  console.log('%c Developed by LiebeBlack ', 'color: #00F0FF; font-family: monospace;');
+  console.log('%c System Rebuilt & Optimized ', 'color: #00F0FF; font-family: monospace;');
 });
