@@ -649,21 +649,20 @@ const SecurityManager = (() => {
     window.addEventListener('resize', detectDevTools);
 
     scrubbingInterval = setInterval(() => {
-      if (!isAdmin) {
+      if (!_isLocalAdmin) {
         detectDevTools();
       }
-    }, 100);
+    }, 500); // Slowed down to improve performance on low-end devices
 
     // 3. Disable Context Menu Silently
     document.addEventListener('contextmenu', e => {
-      if (isAdmin) return;
+      if (_isLocalAdmin) return;
       e.preventDefault();
-      // No showWarning() here, just block it.
     });
 
     // 4. Disable Shortcuts
     document.addEventListener('keydown', e => {
-      if (isAdmin) return;
+      if (_isLocalAdmin) return;
       const key = e.key.toLowerCase();
       if (
         (e.ctrlKey && (key === 'c' || key === 'x' || key === 'u' || key === 's')) ||
@@ -671,66 +670,63 @@ const SecurityManager = (() => {
         (key === 'f12')
       ) {
         e.preventDefault();
-        triggerLock(); // Trigger physical wipe and show warning
+        triggerLock(); 
         return false;
       }
     });
 
-    // 5. Advanced Anti-Source Debugger Trap (Freezes Sources tab)
+    // 5. Advanced Anti-Source Debugger Trap (Slowed down for stability)
     trapInterval = setInterval(() => {
-      if (!isAdmin) {
-        (function () {
-          (function a() {
-            try {
-              (function b(i) {
-                if (("" + i / i).length !== 1 || i % 20 === 0) {
-                  (function () { }).constructor("debugger")();
-                } else {
-                  (function () { }).constructor("debugger")();
-                }
-                b(++i);
-              })(0);
-            } catch (e) { }
+      if (!_isLocalAdmin) {
+        const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent);
+        if (!isMobile) {
+          (function () {
+            (function a() {
+              try {
+                (function b(i) {
+                  if (("" + i / i).length !== 1 || i % 20 === 0) {
+                    (function () { }).constructor("debugger")();
+                  } else {
+                    (function () { }).constructor("debugger")();
+                  }
+                  b(++i);
+                })(0);
+              } catch (e) { }
+            })();
           })();
-        })();
-
-        // Secondary aggressive trap
+        }
+        
         const t = function () {
           const x = new Function("debugger");
           x();
         };
         setTimeout(t, 20);
       }
-    }, 100);
+    }, 800);
   }
 
   function detectDevTools() {
     if (_isLocalAdmin) return;
     
-    // Total Sensitivity Threshold
-    const threshold = 100;
+    // Ignore dimension check on mobile to prevent blocking during resize/orientation change
+    const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|Opera Mini|IEMobile/i.test(navigator.userAgent);
+    if (isMobile) return;
+
+    // Total Sensitivity Threshold (Increased for modern high-res screens)
+    const threshold = 160;
     const isDetected = (window.outerWidth - window.innerWidth > threshold) || 
                        (window.outerHeight - window.innerHeight > threshold);
 
     if (isDetected) {
-      // NUCLEAR PURGE: Redirecting to a standalone file unloads original sources from the browser memory.
       if (!sessionStorage.getItem('isdi_locking')) {
         try { sessionStorage.setItem('isdi_locking', 'true'); } catch(e) {}
-        
-        // Kill execution
         window.stop();
-        
-        // Clear DOM context first
         document.documentElement.innerHTML = '';
-        
-        // Attempt forced redirection (most reliable for Sources purge)
         try {
             window.location.replace('security-lock.html');
         } catch(e) {
-            // Fallback for browsers with strict file:/// origin policies
             window.open('security-lock.html', '_self');
         }
-
         throw new Error("Security Protocol Active: Sources Purged.");
       }
     }
