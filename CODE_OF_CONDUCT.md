@@ -1,4 +1,4 @@
-# Código de Conducta de I.S.D.I
+# Código de Conducta de E.E.D.A
 
 Como creadores y mantenedores de este proyecto, y con el fin de fomentar una comunidad abierta, participativa y pedagógica, nos comprometemos a respetar a todas las personas que contribuyen por medio de reporte de incidentes, publicación de solicitudes de características, actualización de documentación, contribución de código y cualquier otra forma.
 

@@ -1,37 +1,42 @@
-# CONTRIBUTING TO I.S.D.I
+# Guía de Contribución para E.E.D.A.
 
-First off, thank you for considering contributing to I.S.D.I! It's people like you that make this pedagogical ecosystem better for everyone.
+¡Antes que nada, gracias por considerar contribuir a **E.E.D.A. (Ecosistema Educativo Digital Adaptable)**! Es gracias a personas como tú que este ecosistema pedagógico sigue evolucionando para transformar la educación.
 
-## Where to Start
-- **Bug Reports**: If you notice a glitch or a bug, please submit an issue using our bug report template.
-- **Feature Requests**: Have an idea to improve the system? Use the feature request template to let us know.
-- **Documentation**: Improvements to the project documentation are always welcome!
+---
 
-## How to Contribute
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request!
+## ¿Por dónde empezar?
 
-## Development Setup
+- **Reporte de Errores (Bug Reports)**: Si notas un fallo técnico o una inconsistencia visual, por favor abre un *issue* utilizando nuestra plantilla de reporte de errores.
+- **Solicitud de Funciones (Feature Requests)**: ¿Tienes una idea para potenciar el sistema o añadir un nuevo módulo pedagógico? Utiliza la plantilla de solicitud de funciones o contáctanos a través de la sección de contacto en nuestra página web oficial para hacérnoslo saber.
+- **Documentación**: Las mejoras en la redacción, correcciones ortográficas o nuevos ejemplos de implementación son siempre bienvenidas y fundamentales.
+
+---
+
+## Cómo contribuir
+
+Para mantener un flujo de desarrollo limpio y profesional, seguimos el modelo estándar de GitHub:
+
+1.  **Realiza un Fork** del repositorio oficial.
+2.  Crea tu **rama de función** (`git checkout -b feature/nueva-funcion-increible`).
+3.  **Confirma (Commit)** tus cambios con mensajes claros y descriptivos (`git commit -m 'Añadir módulo de lógica adaptativa'`).
+4.  **Sube (Push)** los cambios a tu rama en GitHub (`git push origin feature/nueva-funcion-increible`).
+5.  ¡Abre un **Pull Request** para que revisemos tu propuesta!
+
+---
+
+## 💻 Configuración de Desarrollo
+
+Sigue estos comandos para ejecutar y probar el proyecto en tu entorno local:
+
 ```powershell
-# Clone the repository
-git clone https://github.com/LiebeBlack/I.S.D.I-PC.git
+# 1. Clonar el repositorio oficial
+git clone [https://github.com/LiebeBlack/E.E.D.A.git](https://github.com/LiebeBlack/E.E.D.A.git)
 
-# Navigate into the directory
-cd I.S.D.I-PC
+# 2. Entrar al directorio del proyecto
+cd E.E.D.A
 
-# Install dependencies
+# 3. Instalar las dependencias necesarias
 pip install -r requirements.txt
 
-# Run the project locally
+# 4. Ejecutar el ecosistema localmente
 python src/main.py
-```
-
-## Pull Request Process
-1. Ensure your code follows the existing style, which is highly tailored to our premium Design Tokens.
-2. Update the `README.md` with details of changes to the interface, new modules, etc.
-3. Your PR will be reviewed by the maintainers before merging.
-
-Thank you!
