@@ -123,7 +123,6 @@ class Dashboard(BaseModule):
     def _build_quick_actions(self) -> ft.Row:
         """Acciones rápidas de navegación a los módulos principales."""
         actions = [
-            (ft.Icons.MAP_ROUNDED,      "Ver Temas",      "zones",    self.protocol_color),
             (ft.Icons.SCIENCE_ROUNDED,  "Laboratorio",    "lab",      DesignTokens.COLORS["secondary"]),
             (ft.Icons.SECURITY_ROUNDED, "Seguridad",      "security", DesignTokens.COLORS["warning"]),
         ]
@@ -166,7 +165,7 @@ class Dashboard(BaseModule):
             content=ft.Row(
                 [
                     ft.Text(
-                        "I.S.D.I OS v4.1",
+                        "E.E.D.A. OS v4.1",
                         size=10,
                         color=DesignTokens.get_text_dim(self.protocol),
                         font_family="JetBrains Mono",

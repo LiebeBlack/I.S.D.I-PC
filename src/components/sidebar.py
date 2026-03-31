@@ -13,19 +13,19 @@ _NAV_ITEMS: dict[str, list[tuple]] = {
     "alpha": [
         (ft.Icons.MAP_ROUNDED,              "Explorar Temas",        "zones"),
         (ft.Icons.BRUSH_ROUNDED,            "Taller Creativo",       "lab"),
-        (ft.Icons.SHIELD_ROUNDED,           "Mi Seguridad",          "security"),
+        (ft.Icons.SHIELD_ROUNDED,           "Panel de Control",      "security"),
         (ft.Icons.BAR_CHART_ROUNDED,        "Resumen",               "dashboard"),
     ],
     "delta": [
         (ft.Icons.AUTO_STORIES_ROUNDED,     "Temas",                 "zones"),
         (ft.Icons.SCIENCE_ROUNDED,          "Laboratorio",           "lab"),
-        (ft.Icons.SECURITY_ROUNDED,         "Seguridad",             "security"),
+        (ft.Icons.DASHBOARD_ROUNDED,        "Panel de Control",      "security"),
         (ft.Icons.BAR_CHART_ROUNDED,        "Panel",                 "dashboard"),
     ],
     "omega": [
         (ft.Icons.ACCOUNT_TREE_ROUNDED,     "Topología de Red",      "zones"),
         (ft.Icons.TERMINAL_ROUNDED,         "Simulador",             "lab"),
-        (ft.Icons.GPP_GOOD_ROUNDED,         "Ciberdefensa",          "security"),
+        (ft.Icons.DASHBOARD_ROUNDED,        "Puente de Mando",       "security"),
         (ft.Icons.BAR_CHART_ROUNDED,        "Dashboard",             "dashboard"),
     ],
 }
@@ -33,7 +33,7 @@ _NAV_ITEMS: dict[str, list[tuple]] = {
 
 class Sidebar(ft.Container):
     """
-    Barra de navegación lateral para I.S.D.I.
+    Barra de navegación lateral para E.E.D.A.
 
     Se adapta visualmente y semánticamente según el protocolo activo:
         - Alpha  → Narrativa espacial / Exploradores / Verde
@@ -116,7 +116,7 @@ class Sidebar(ft.Container):
                     ft.Column(
                         [
                             ft.Text(
-                                f"I.S.D.I — {self.protocol.capitalize()}",
+                                f"E.E.D.A. — {self.protocol.capitalize()}",
                                 size=16,
                                 weight="bold",
                                 color=DesignTokens.get_text_main(self.protocol),

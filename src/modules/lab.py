@@ -62,7 +62,7 @@ _ACTIVITIES = [
 
 # Fragmentos de código para el reto de teclado
 _KEYBOARD_CODES = [
-    "print('I.S.D.I_V4_ONLINE')",
+    "print('E.E.D.A._V4_ONLINE')",
     "for chunk in data_stream: process(chunk)",
     "if security.is_active(): access_granted()",
     "def firewall_scan(host: str) -> bool: return True",
@@ -71,7 +71,7 @@ _KEYBOARD_CODES = [
     "chmod 755 /var/www/html/secure_vault",
     "sudo iptables -A INPUT -p tcp --dport 22 -j DROP",
     "SELECT * FROM users WHERE clearance_level = 'OMEGA';",
-    "export I.S.D.I_AUTH_TOKEN='x9f8b7$kL2'",
+    "export E.E.D.A._AUTH_TOKEN='x9f8b7$kL2'",
     "while not system.shutdown(): monitor_nodes()",
     "class CryptoNode(BaseSecureModule): pass",
     "match packet.protocol: case 'TCP': forward()",

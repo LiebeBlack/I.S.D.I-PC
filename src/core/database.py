@@ -1,6 +1,6 @@
 """
 Módulo: database.py
-Propósito: Capa de persistencia centralizada para I.S.D.I (SQLite3).
+Propósito: Capa de persistencia centralizada para E.E.D.A. (SQLite3).
 Política (Cot.md): NINGÚN módulo o componente debe acceder directamente a la DB.
 Toda interacción debe realizarse a través de esta clase.
 """
@@ -223,3 +223,6 @@ class DatabaseManager:
 # Instancia global singleton — importar desde todos los módulos que lo necesiten
 # ──────────────────────────────────────────────────────────────────────────────
 db = DatabaseManager()
+
+# Alias para compatibilidad
+Database = DatabaseManager

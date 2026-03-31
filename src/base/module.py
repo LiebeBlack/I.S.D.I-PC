@@ -1,6 +1,6 @@
 """
 Módulo: module.py  (base/module.py)
-Propósito: Clase base abstracta para todos los módulos de I.S.D.I.
+Propósito: Clase base abstracta para todos los módulos de E.E.D.A.
 Política (Cot.md): Toda nueva pantalla/módulo principal debe heredar de BaseModule.
 """
 
@@ -11,7 +11,7 @@ from core.theme import DesignTokens
 
 class BaseModule(ft.Container, ABC):
     """
-    Clase base para todos los módulos principales de I.S.D.I.
+    Clase base para todos los módulos principales de E.E.D.A.
 
     Características:
         - Hereda de ft.Container para poder insertarse directamente en el layout.

@@ -1,6 +1,6 @@
 """
 Módulo: event_bus.py
-Propósito: Bus de eventos centralizado y desacoplado para comunicación entre módulos I.S.D.I.
+Propósito: Bus de eventos centralizado y desacoplado para comunicación entre módulos E.E.D.A.
 Política: Toda comunicación entre módulos DEBE usar este bus. Sin referencias cruzadas directas.
 """
 
