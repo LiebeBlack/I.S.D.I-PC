@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="I.S.D.I — Currículum: 8 unidades temáticas de ciberseguridad, hardware y desarrollo de software." />
+  <meta name="author" content="LiebeBlack" />
+  <meta property="og:title" content="I.S.D.I — Plan de Estudios" />
+  <meta property="og:description" content="Explora las 8 unidades temáticas y el modelo pedagógico CPA de Isla Digital." />
+  <meta property="og:type" content="website" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://avatars.githubusercontent.com https://raw.githubusercontent.com; connect-src 'self' https://api.github.com https://raw.githubusercontent.com; worker-src 'self' blob:; frame-src 'none'; object-src 'none';" />
+  <meta name="theme-color" content="#0052FF" />
+  <title>I.S.D.I — Currículum</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+</head>
+<body>
+  <div class="loader" id="loader"><div class="loader__spinner"></div><span class="loader__text">INICIALIZANDO PROTOCOLO: CURRÍCULUM...</span></div>
+  <div class="page-transition" id="page-transition"></div>
+  <div class="cursor-follower" id="cursor-follower"></div>
+  <canvas id="particle-canvas"></canvas>
+  <div class="static-bg"></div>
+  <div class="grid-overlay"></div>
+  <div class="mobile-overlay" id="mobile-overlay"></div>
+
+  <nav class="nav" id="main-nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo"><div class="nav__logo-icon">ID</div><span>I.S.D.I</span></a>
+      <div class="nav__links" id="nav-links">
+        <a href="index.html" class="nav__link">Home</a>
+        <a href="architecture.html" class="nav__link">Arquitectura</a>
+        <a href="curriculum.html" class="nav__link active">Currículum</a>
+        <a href="bitacora.html" class="nav__link">Bitácora</a>
+        <a href="repository.html" class="nav__link">Repositorio</a>
+        <a href="https://github.com/LiebeBlack/I.S.D.I-PC" target="_blank" rel="noopener" class="nav__link">GitHub</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+      </div>
+      <button class="nav__hamburger" id="nav-hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="breadcrumbs">
+        <a href="index.html">Home</a><span class="breadcrumbs__sep">/</span>
+        <span class="breadcrumbs__current">Currículum</span>
+      </div>
+    </div>
+
+    <section class="section" style="padding-top:0">
+      <div class="container">
+        <div class="section-header" style="text-align:left;margin-left:0">
+          <span class="section-header__label reveal">Programa Académico</span>
+          <h1 class="section-header__title reveal delay-1" style="max-width:none">
+            <span class="gradient-text">8 Unidades</span> Temáticas
+          </h1>
+          <p class="section-header__description reveal delay-2" style="margin-left:0;max-width:55ch">
+            Acá se desglosa todo lo que se va a ver en el programa. Abriendo cada unidad podés ver los temas y en qué fase CPA caen.
+          </p>
+        </div>
+
+        <!-- Progress Overview -->
+        <div class="stats-bar reveal" style="margin-bottom:var(--space-xl)">
+          <div class="stat-item"><span class="stat-item__value" style="color:var(--accent-primary)">8</span><span class="stat-item__label">Unidades</span></div>
+          <div class="stat-item"><span class="stat-item__value" style="color:var(--accent-secondary)">48+</span><span class="stat-item__label">Temas</span></div>
+          <div class="stat-item"><span class="stat-item__value" style="color:var(--accent-tertiary)">3</span><span class="stat-item__label">Fases CPA</span></div>
+          <div class="stat-item"><span class="stat-item__value gradient-text">∞</span><span class="stat-item__label">Posibilidades</span></div>
+        </div>
+
+        <!-- Accordion Units -->
+        <div class="unit-accordion" id="curriculum-accordion">
+
+          <div class="unit reveal" data-cursor="magnifier">
+            <div class="unit__header" onclick="this.parentElement.classList.toggle('open')">
+              <span class="unit__number">01</span>
+              <div class="unit__info"><h3 class="unit__title">Fundamentos de Hardware</h3><span class="unit__meta">6 temas · Fase Concreta</span></div>
+              <svg class="unit__toggle" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="unit__body"><div class="unit__content">
+              <p style="color:var(--text-secondary);margin-bottom:var(--space-md);line-height:1.7">Se arranca por lo básico: identificar cada componente, saber para qué sirve, y armar un equipo desde cero.</p>
+              <div class="unit__topics">
+                <div class="topic-tag"><span>Componentes del PC</span></div>
+                <div class="topic-tag"><span>Fuentes de poder (PSU)</span></div>
+                <div class="topic-tag"><span>Almacenamiento (HDD/SSD/NVMe)</span></div>
+                <div class="topic-tag"><span>CPU &amp; Procesamiento</span></div>
+                <div class="topic-tag"><span>RAM &amp; Memoria</span></div>
+                <div class="topic-tag"><span>GPU &amp; Tarjetas de expansión</span></div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="unit reveal delay-1" data-cursor="magnifier">
+            <div class="unit__header" onclick="this.parentElement.classList.toggle('open')">
+              <span class="unit__number">02</span>
+              <div class="unit__info"><h3 class="unit__title">Arquitectura de Computadores</h3><span class="unit__meta">7 temas · Fase Pictórica</span></div>
+              <svg class="unit__toggle" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="unit__body"><div class="unit__content">
+              <p style="color:var(--text-secondary);margin-bottom:var(--space-md);line-height:1.7">Ya sabés qué es una CPU, ahora entendé cómo piensa. Desde Von Neumann hasta los buses de datos.</p>
+              <div class="unit__topics">
+                <div class="topic-tag"><span>Arquitectura Von Neumann</span></div>
+                <div class="topic-tag"><span>Ciclo de instrucción</span></div>
+                <div class="topic-tag"><span>Buses de datos</span></div>
+                <div class="topic-tag"><span>Jerarquía de memoria</span></div>
+                <div class="topic-tag"><span>Pipeline &amp; Paralelismo</span></div>
+                <div class="topic-tag"><span>Sistemas numéricos</span></div>
+                <div class="topic-tag"><span>Lógica booleana</span></div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="unit reveal delay-2">
+            <div class="unit__header" onclick="this.parentElement.classList.toggle('open')">
+              <span class="unit__number">03</span>
+              <div class="unit__info"><h3 class="unit__title">Sistemas Operativos</h3><span class="unit__meta">6 temas · Fase Pictórica-Abstracta</span></div>
+              <svg class="unit__toggle" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="unit__body"><div class="unit__content">
+              <p style="color:var(--text-secondary);margin-bottom:var(--space-md);line-height:1.7">El software que hace que el hardware funcione. Se arranca con Linux porque no hay mejor forma de entender un SO que usando la terminal.</p>
+              <div class="unit__topics">
+                <div class="topic-tag"><span>Linux fundamentals</span></div>
+                <div class="topic-tag"><span>Windows internals</span></div>
+                <div class="topic-tag"><span>Gestión de procesos</span></div>
+                <div class="topic-tag"><span>Gestión de memoria</span></div>
+                <div class="topic-tag"><span>Sistemas de archivos</span></div>
+                <div class="topic-tag"><span>Terminal &amp; CLI</span></div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="unit reveal delay-3">
+            <div class="unit__header" onclick="this.parentElement.classList.toggle('open')">
+              <span class="unit__number">04</span>
+              <div class="unit__info"><h3 class="unit__title">Redes y Conectividad</h3><span class="unit__meta">7 temas · Fase Pictórica</span></div>
+              <svg class="unit__toggle" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="unit__body"><div class="unit__content">
+              <p style="color:var(--text-secondary);margin-bottom:var(--space-md);line-height:1.7">Si no entendés redes, no entendés internet. Acá se aprende cómo viajan los datos y cómo se configura una red real.</p>
+              <div class="unit__topics">
+                <div class="topic-tag"><span>Modelo OSI</span></div>
+                <div class="topic-tag"><span>TCP/IP</span></div>
+                <div class="topic-tag"><span>Topologías de red</span></div>
+                <div class="topic-tag"><span>WiFi &amp; Wireless</span></div>
+                <div class="topic-tag"><span>Herramientas de red</span></div>
+                <div class="topic-tag"><span>Subnetting</span></div>
+                <div class="topic-tag"><span>DNS &amp; DHCP</span></div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="unit reveal" data-cursor="magnifier">
+            <div class="unit__header" onclick="this.parentElement.classList.toggle('open')">
+              <span class="unit__number">05</span>
+              <div class="unit__info"><h3 class="unit__title">Ciberseguridad</h3><span class="unit__meta">8 temas · Fase Abstracta</span></div>
+              <svg class="unit__toggle" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="unit__body"><div class="unit__content">
+              <p style="color:var(--text-secondary);margin-bottom:var(--space-md);line-height:1.7">La unidad más crítica del programa. Criptografía, firewalls, malware, ethical hacking — lo esencial para proteger sistemas.</p>
+              <div class="unit__topics">
+                <div class="topic-tag"><span>Principios de seguridad</span></div>
+                <div class="topic-tag"><span>Criptografía básica</span></div>
+                <div class="topic-tag"><span>Malware &amp; Amenazas</span></div>
+                <div class="topic-tag"><span>Firewalls &amp; IDS</span></div>
+                <div class="topic-tag"><span>Ethical Hacking intro</span></div>
+                <div class="topic-tag"><span>Autenticación &amp; Auth</span></div>
+                <div class="topic-tag"><span>Auditoría de seguridad</span></div>
+                <div class="topic-tag"><span>Normativa &amp; Compliance</span></div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="unit reveal delay-1">
+            <div class="unit__header" onclick="this.parentElement.classList.toggle('open')">
+              <span class="unit__number">06</span>
+              <div class="unit__info"><h3 class="unit__title">Programación con Python</h3><span class="unit__meta">7 temas · Fase Abstracta</span></div>
+              <svg class="unit__toggle" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="unit__body"><div class="unit__content">
+              <p style="color:var(--text-secondary);margin-bottom:var(--space-md);line-height:1.7">El lenguaje que conecta todo el proyecto. Se arranca desde cero y se llega hasta OOP e interfaces gráficas con Flet.</p>
+              <div class="unit__topics">
+                <div class="topic-tag"><span>Sintaxis &amp; Tipos de datos</span></div>
+                <div class="topic-tag"><span>Estructuras de control</span></div>
+                <div class="topic-tag"><span>Funciones &amp; Módulos</span></div>
+                <div class="topic-tag"><span>Clases &amp; OOP</span></div>
+                <div class="topic-tag"><span>Excepciones &amp; Errores</span></div>
+                <div class="topic-tag"><span>Manejo de archivos</span></div>
+                <div class="topic-tag"><span>Interfaces con Flet</span></div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="unit reveal delay-2">
+            <div class="unit__header" onclick="this.parentElement.classList.toggle('open')">
+              <span class="unit__number">07</span>
+              <div class="unit__info"><h3 class="unit__title">Bases de Datos con SQLite</h3><span class="unit__meta">6 temas · Fase Abstracta</span></div>
+              <svg class="unit__toggle" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="unit__body"><div class="unit__content">
+              <p style="color:var(--text-secondary);margin-bottom:var(--space-md);line-height:1.7">Tu app necesita guardar datos. Acá se aprende a diseñar tablas, escribir SQL, normalizar y conectar todo desde Python.</p>
+              <div class="unit__topics">
+                <div class="topic-tag"><span>Modelado relacional</span></div>
+                <div class="topic-tag"><span>Normalización (1NF-3NF)</span></div>
+                <div class="topic-tag"><span>SQL: SELECT, INSERT, UPDATE</span></div>
+                <div class="topic-tag"><span>JOINs &amp; Relaciones</span></div>
+                <div class="topic-tag"><span>Python + sqlite3</span></div>
+                <div class="topic-tag"><span>Transacciones &amp; Integridad</span></div>
+              </div>
+            </div></div>
+          </div>
+
+          <div class="unit reveal delay-3">
+            <div class="unit__header" onclick="this.parentElement.classList.toggle('open')">
+              <span class="unit__number">08</span>
+              <div class="unit__info"><h3 class="unit__title">Proyecto Integrador</h3><span class="unit__meta">5 fases · Todas las competencias</span></div>
+              <svg class="unit__toggle" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="unit__body"><div class="unit__content">
+              <p style="color:var(--text-secondary);margin-bottom:var(--space-md);line-height:1.7">Acá se junta todo. Hacés una app real con interfaz Flet, base de datos SQLite, Clean Architecture, y la defendés.</p>
+              <div class="unit__topics">
+                <div class="topic-tag"><span>Planificación &amp; Diseño</span></div>
+                <div class="topic-tag"><span>Clean Architecture</span></div>
+                <div class="topic-tag"><span>UI con Flet</span></div>
+                <div class="topic-tag"><span>Testing &amp; QA</span></div>
+                <div class="topic-tag"><span>Deploy &amp; Presentación</span></div>
+              </div>
+            </div></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section" style="background:var(--bg-secondary)">
+      <div class="container container--narrow" style="text-align:center">
+        <h2 class="section-header__title reveal">¿Listo para <span class="gradient-text">explorar</span>?</h2>
+        <p style="color:var(--text-secondary);margin:var(--space-sm) auto var(--space-lg);max-width:40ch" class="reveal delay-1">Mirá cómo está armado el código por dentro, o navegalo directamente desde acá.</p>
+        <div class="reveal delay-2" style="display:flex;justify-content:center;gap:var(--space-sm);flex-wrap:wrap">
+          <a href="architecture.html" class="btn btn--primary">Ver Arquitectura</a>
+          <a href="repository.html" class="btn btn--secondary">Ver Repositorio</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand"><div class="footer__brand-name">I.S.D.I — Isla Digital</div><p class="footer__brand-desc">Plataforma educativa de ciberseguridad, hardware y desarrollo de software.</p></div>
+        <div><h4 class="footer__col-title">Páginas</h4><div class="footer__col-links"><a href="index.html">Home</a><a href="architecture.html">Arquitectura</a><a href="curriculum.html">Currículum</a><a href="bitacora.html">Bitácora</a><a href="repository.html">Repositorio</a></div></div>
+        <div><h4 class="footer__col-title">Proyecto</h4><div class="footer__col-links"><a href="https://github.com/LiebeBlack/I.S.D.I-PC" target="_blank">Repositorio</a><a href="https://github.com/LiebeBlack" target="_blank">Desarrollador</a></div></div>
+      </div>
+      <div class="footer__bottom">
+        <span class="footer__copy">© 2026 I.S.D.I — Isla Digital. Desarrollado por <a href="https://github.com/LiebeBlack" target="_blank">LiebeBlack</a>.</span>
+        <div class="footer__socials">
+          <a href="https://github.com/LiebeBlack" target="_blank" rel="noopener" class="footer__social-link" aria-label="GitHub">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="perf-pill"><span class="perf-pill__dot"></span><span class="perf-pill__label">Detectando GPU...</span></div>
+  <script src="js/particles.js" defer></script>
+  <script src="js/core.js" defer></script>
+</body>
+</html>
